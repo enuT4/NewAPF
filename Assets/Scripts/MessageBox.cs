@@ -9,7 +9,7 @@ public class MessageBox : MonoBehaviour
     [SerializeField] internal Text messageLabel;
     [SerializeField] internal Text messageText;
 
-    MessageBox inst;
+    public static MessageBox inst;
 
     private void Awake() => AwakeFunc();
 
@@ -28,7 +28,7 @@ public class MessageBox : MonoBehaviour
     // Start is called before the first frame update
     void StartFunc()
     {
-        if (messageOKBtn != null) messageOKBtn.onClick.AddListener(() => this.gameObject.SetActive(false));
+        if (messageOKBtn != null) messageOKBtn.onClick.AddListener(() => gameObject.SetActive(false));
     }
 
     //private void Update() => UpdateFunc();
