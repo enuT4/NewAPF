@@ -5,8 +5,8 @@ using UnityEngine;
 public class ScreenSize : MonoBehaviour
 {
     //화면 관련 변수 선언
-    int setWidth = 1080;
-    int setHeight = 1920;
+    int setWidth = 1440;
+    int setHeight = 3200;
 
     int deviceWidth = Screen.width;
     int deviceHeight = Screen.height;
