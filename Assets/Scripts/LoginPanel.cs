@@ -185,7 +185,7 @@ public class LoginPanel : MonoBehaviour
 
         if (result.InfoResultPayload != null)
         {
-            //GlobalValue.g_Nickname = result.InfoResultPayload.PlayerProfile.DisplayName;
+            GlobalValue.g_Nickname = result.InfoResultPayload.PlayerProfile.DisplayName;
 
             foreach (var eachStat in result.InfoResultPayload.PlayerStatistics)
             {
@@ -233,17 +233,17 @@ public class LoginPanel : MonoBehaviour
                 else if (eachData.Key == "YSMSBonusUGLv")
                 {
                     if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_YSMSUGLv[0] = tempValue;
+                        GlobalValue.g_YSMSUGLevel[0] = tempValue;
                 }
                 else if (eachData.Key == "YSMSFeverUGLv")
                 {
                     if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_YSMSUGLv[1] = tempValue;
+                        GlobalValue.g_YSMSUGLevel[1] = tempValue;
                 }
                 else if (eachData.Key == "YSMSSuperUGLv")
                 {
                     if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_YSMSUGLv[2] = tempValue;
+                        GlobalValue.g_YSMSUGLevel[2] = tempValue;
                 }
                 else if (eachData.Key == "YSMSTutSkipOnOff")
                 {
@@ -253,17 +253,17 @@ public class LoginPanel : MonoBehaviour
                 else if (eachData.Key == "SDJRBonusUGLv")
                 {
                     if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_SDJRUGLv[0] = tempValue;
+                        GlobalValue.g_SDJRUGLevel[0] = tempValue;
                 }
                 else if (eachData.Key == "SDJRFeverUGLv")
                 {
                     if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_SDJRUGLv[1] = tempValue;
+                        GlobalValue.g_SDJRUGLevel[1] = tempValue;
                 }
                 else if (eachData.Key == "SDJRSuperUGLv")
                 {
                     if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_SDJRUGLv[2] = tempValue;
+                        GlobalValue.g_SDJRUGLevel[2] = tempValue;
                 }
                 else if (eachData.Key == "SDJRTutSkipOnOff")
                 {
