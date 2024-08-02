@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,6 +11,8 @@ public class TitleMgr : MonoBehaviour
 
     [SerializeField] private Button gameStartBtn;
     GameObject loginPanelObj;
+
+    bool isTest = false;
 
     void Awake() => AwakeFunc();
 
@@ -28,9 +32,21 @@ public class TitleMgr : MonoBehaviour
         if (gameStartBtn != null) gameStartBtn.onClick.AddListener(() => loginPanelObj.SetActive(true));
     }
 
+    //void Update() => UpdateFunc();
+
     // Update is called once per frame
-    void Update()
+    void UpdateFunc()
     {
-        
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            isTest = !isTest;
+        }
+
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            Debug.Log(Convert.ToInt32(isTest));
+        }
+
+
     }
 }
