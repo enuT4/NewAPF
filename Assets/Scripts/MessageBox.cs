@@ -99,8 +99,8 @@ public class MessageBox : MonoBehaviour
             GlobalValue.g_RiceCheckDate = -1;
             for (int ii = 0; ii < 3; ii++)
             {
-                GlobalValue.g_YSMSUGLevel[ii] = -1;
-                GlobalValue.g_SDJRUGLevel[ii] = -1;
+                GlobalValue.g_YSMSUpgradeLv[ii] = -1;
+                GlobalValue.g_SDJRUpgradeLv[ii] = -1;
             }
             GlobalValue.g_YSMSTutSkipYN = -1;
             GlobalValue.g_SDJRTutSkipYN = -1;

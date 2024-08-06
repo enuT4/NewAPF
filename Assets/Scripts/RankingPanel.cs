@@ -9,6 +9,7 @@ using UnityEngine.UI;
 
 public class RankingPanel : MonoBehaviour
 {
+    internal GameObject rankingGameObj;
     [SerializeField] internal Text gameNameTxt;
     [SerializeField] internal Button closePanelBtn;
     [SerializeField] internal Sprite[] buttonActiveImg;
@@ -34,10 +35,11 @@ public class RankingPanel : MonoBehaviour
 
     void AwakeFunc()
     {
-        if (!gameNameTxt) gameNameTxt = transform.Find("GameText").GetComponent<Text>();
-        if (!closePanelBtn) closePanelBtn = transform.Find("PanelCloseBtn").GetComponent<Button>();
-        if (!gameRankBtn) gameRankBtn = transform.Find("GameRankingBtn").GetComponent<Button>();
-        if (!totalRankBtn) totalRankBtn = transform.Find("TotalRankingBtn").GetComponent<Button>();
+        if (!rankingGameObj) rankingGameObj = transform.GetChild(0).gameObject;
+        if (!gameNameTxt) gameNameTxt = rankingGameObj.transform.Find("GameText").GetComponent<Text>();
+        if (!closePanelBtn) closePanelBtn = rankingGameObj.transform.Find("PanelCloseBtn").GetComponent<Button>();
+        if (!gameRankBtn) gameRankBtn = rankingGameObj.transform.Find("GameRankingBtn").GetComponent<Button>();
+        if (!totalRankBtn) totalRankBtn = rankingGameObj.transform.Find("TotalRankingBtn").GetComponent<Button>();
 
         TransformScrollView(true);
     }

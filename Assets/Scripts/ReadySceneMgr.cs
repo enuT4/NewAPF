@@ -111,7 +111,7 @@ public class ReadySceneMgr : MonoBehaviour
         if (!userLvTxt) userLvTxt = upgradeCanvasObj.transform.Find("UserNameText").GetComponent<Text>();
 
         if (!messageBoxObj) messageBoxObj = upgradeCanvasObj.transform.Find("MessageBox").gameObject;
-        //if (!rankingPanelObj) rankingPanelObj = upgradeCanvasObj.transform.Find("RankingPanel").gameObject;
+        if (!rankingPanelObj) rankingPanelObj = upgradeCanvasObj.transform.Find("RankingPanel").gameObject;
         //if (!upgradePanelObj) upgradePanelObj = upgradeCanvasObj.transform.Find("UpgradePanel").gameObject;
         
         for (int ii = 0; ii < itemCostTxtArr.Length; ii++)
