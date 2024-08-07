@@ -30,7 +30,7 @@ public class UpgradePanel : MonoBehaviour
     [SerializeField] internal Sprite[] upgradeSpriteGroup = new Sprite[8];
     [SerializeField] internal Text[] upgradeAmountGroup = new Text[3];
 
-    public static UpgradeKind ugKind = UpgradeKind.ugKindCount;
+    [SerializeField] internal UpgradeKind ugKind = UpgradeKind.ugKindCount;
     int upgradeCost = 0;
 
     bool isupgradeDelay = false;
@@ -84,12 +84,32 @@ public class UpgradePanel : MonoBehaviour
 
     }
 
-    //void Update() => UpdateFunc();
+    void Update() => UpdateFunc();
 
     // Update is called once per frame
     void UpdateFunc()
     {
-        
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            Debug.Log(ugKind);
+            upgradeIconImg.sprite = upgradeSpriteGroup[0];
+        }
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            Debug.Log(ugKind);
+            upgradeIconImg.sprite = upgradeSpriteGroup[1];
+        }
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            Debug.Log(ugKind);
+            upgradeIconImg.sprite = upgradeSpriteGroup[2];
+        }
+
+    }
+
+    private void OnEnable()
+    {
+        UpdateUpgradeKind();
     }
 
     void UpdateUpgradeKind()
@@ -104,7 +124,7 @@ public class UpgradePanel : MonoBehaviour
 
         if (ugKind == UpgradeKind.Bonus)
         {
-            if (upgradeIconImg != null)
+            if (upgradeIconImg != null) 
                 upgradeIconImg.sprite = upgradeSpriteGroup[0];
 
             upgradeAmountGroup[0].gameObject.SetActive(true);
@@ -185,7 +205,7 @@ public class UpgradePanel : MonoBehaviour
         }
         else if (ugKind == UpgradeKind.Super)
         {
-            if (upgradeIconImg != null)
+            if (upgradeIconImg != null) 
                 upgradeIconImg.sprite = upgradeSpriteGroup[2];
 
             upgradeAmountGroup[0].gameObject.SetActive(false);
@@ -331,16 +351,15 @@ public class UpgradePanel : MonoBehaviour
         if (GlobalValue.g_UserGold - upgradeCost < 0)
         {
             messageBoxObj.SetActive(true);
-            msgBox.SetMessageText("★ 재화 부족 알림 ★", "재화가 부족해요 ㅠ0ㅠ", MessageState.OK);
+            msgBox.SetMessageText("재화 부족 알림", "재화가 부족해요 ㅠ0ㅠ", MessageState.OK);
             return;
         }
         if (isupgradeDelay) return;
 
-        //변화된 골드값 서버에 저장
+        
         GlobalValue.g_UserGold -= upgradeCost;
-        //NetworkMgr.Inst.PushPacket(PacketType.UserMoney);
+        NetworkMgr.inst.PushPacket(PacketType.UserMoney);
 
-        //변화된 레벨값 UI에 적용 및 서버에 저장
         if (GlobalValue.g_GameKind == GameKind.YSMS)
         {
             if (ugKind == UpgradeKind.Bonus && GlobalValue.g_YSMSUpgradeLv[0] < 15)
@@ -350,7 +369,7 @@ public class UpgradePanel : MonoBehaviour
             else if (ugKind == UpgradeKind.Super && GlobalValue.g_YSMSUpgradeLv[2] < 15)
                 GlobalValue.g_YSMSUpgradeLv[2]++;
 
-            //NetworkMgr.Inst.PushPacket(PacketType.YSMSUGLv);
+            NetworkMgr.inst.PushPacket(PacketType.YSMSUpgradeLv);
         }
         else if (GlobalValue.g_GameKind == GameKind.SDJR)
         {
@@ -361,7 +380,7 @@ public class UpgradePanel : MonoBehaviour
             else if (ugKind == UpgradeKind.Super && GlobalValue.g_SDJRUpgradeLv[2] < 15)
                 GlobalValue.g_SDJRUpgradeLv[2]++;
 
-            //NetworkMgr.Inst.PushPacket(PacketType.SDJRUGLv);
+            NetworkMgr.inst.PushPacket(PacketType.SDJRUpgradeLv);
         }
         UpdateUpgradeKind();
 

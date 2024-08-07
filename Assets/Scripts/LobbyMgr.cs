@@ -47,21 +47,10 @@ public class LobbyMgr : MonoBehaviour
         });
 
         if (YSMSGameBtn != null)
-            YSMSGameBtn.onClick.AddListener(() =>
-            {
-                GlobalValue.g_GameKind = GameKind.YSMS;
-                SceneManager.LoadScene("YSMSReadyScene");
-            });
+            YSMSGameBtn.onClick.AddListener(() => { SetGameKind(GameKind.YSMS); });
 
         if (SDJRGameBtn != null)
-            SDJRGameBtn.onClick.AddListener(() =>
-            {
-                GlobalValue.g_GameKind = GameKind.SDJR;
-                SceneManager.LoadScene("SDJRReadyScene");
-            });
-
-
-
+            SDJRGameBtn.onClick.AddListener(() => { SetGameKind(GameKind.SDJR); });
     }
 
     // Update is called once per frame
@@ -86,5 +75,11 @@ public class LobbyMgr : MonoBehaviour
             GlobalValue.g_UserGold = 20000;
             GlobalValue.g_isFirstLogin = false;
         }
+    }
+
+    void SetGameKind(GameKind gKind)
+    {
+        GlobalValue.g_GameKind = gKind;
+        SceneManager.LoadScene("ReadyScene");
     }
 }
