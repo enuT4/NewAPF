@@ -90,7 +90,8 @@ public class MemoryPoolManager : MonoBehaviour
         if (poolDictionary.ContainsKey(objectName))
         {
             int idx = poolDictionary[objectName];
-            for(int i = 0; i < objectsList[idx].Length; i++)
+
+            for (int i = 0; i < objectsList[idx].Length; i++)
             {
                 if(!objectsList[idx][i].gameObject.activeSelf)
                 {
@@ -104,4 +105,5 @@ public class MemoryPoolManager : MonoBehaviour
 
         return null;
     }
+
 }

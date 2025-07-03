@@ -13,9 +13,10 @@ public enum MessageState
 
 public enum MessageYesNoKind
 {
-    LobbyLogout,
-    YSMSPausePanel,
+    YSMSPausePanel = 0,
     SDJRPausePanel,
+    LobbyLogout,
+    GotoLobby,
     YesNoKindCount
 }
 

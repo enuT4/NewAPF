@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEditor.Build;
 using UnityEngine;
 
@@ -71,5 +72,15 @@ public class GlobalValue : MonoBehaviour
         superAmount = new float[16] { 0.0f, 1.0f, 1.2f, 1.4f, 1.7f, 2.0f, 2.5f, 3.0f, 3.5f, 4.0f, 4.5f, 5.0f, 5.5f, 6.0f, 7.0f, 8.0f };
     }
 
+
+
+    //사운드 변수
+
+    public static float musicVolume = 1.0f;
+    public static float masterVolume = 1.0f;
+    public static float effectVolume = 1.0f;
+    public static bool masterMute = false;
+    public static bool musicMute = false;
+    public static bool effectMute = false;
 
 }
