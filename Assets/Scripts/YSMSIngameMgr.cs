@@ -29,12 +29,13 @@ public class YSMSIngameMgr : MonoBehaviour
     [SerializeField] internal Image guagebarbackImg;
     [SerializeField] internal Image guagebarImg;
     [SerializeField] internal Image timebarImg;
-    Vector3 timebarPos;
+    Vector3 timebarMaxPos;
     float timebarX;
     [SerializeField] internal Text timerText;
 
     [SerializeField] internal Button pauseBtn;
     [SerializeField] internal GameObject pausePanelObj;
+    ComboText tempComboText;
 
     float gameTime = 60.0f;
     float maxTime = 60.0f;
@@ -95,6 +96,7 @@ public class YSMSIngameMgr : MonoBehaviour
     int gameLevel = 1;
     Vector3 destinationPos = Vector3.zero;
     float newScale;
+    YSMSCharNode firstCharNode;
 
 
     //아이템
@@ -151,8 +153,8 @@ public class YSMSIngameMgr : MonoBehaviour
         if (!pauseBtn) pauseBtn = YSMSCanvasObj.transform.Find("PauseBtn").GetComponent<Button>();
         if (!pausePanelObj) pausePanelObj = YSMSCanvasObj.transform.Find("PausePanel").gameObject;
 
-        if (!timebarImg) timebarImg = YSMSCanvasObj.transform.Find("TimerBarObj").transform.GetChild(0).GetComponent<Image>();
-        if (!timerText) timerText = YSMSCanvasObj.transform.Find("TimerBarObj").transform.GetChild(1).GetComponent<Text>();
+        if (!timebarImg) timebarImg = YSMSCanvasObj.transform.Find("BGImg").transform.GetChild(0).transform.GetChild(0).GetComponent<Image>();
+        if (!timerText) timerText = YSMSCanvasObj.transform.Find("BGImg").transform.GetChild(0).transform.GetChild(1).GetComponent<Text>();
         if (!scoreText) scoreText = YSMSCanvasObj.transform.Find("ScoreText").GetComponent<Text>();
         //if (!tempposObj) tempposObj = charSpawnTr.GetChild(0).gameObject;
     }
@@ -200,7 +202,7 @@ public class YSMSIngameMgr : MonoBehaviour
             plus10SecImg.gameObject.SetActive(false);
 
         InitSpawnFunc();
-        timebarPos = timebarImg.transform.position; ;
+        timebarMaxPos = timebarImg.transform.position; ;
         timerText.text = ((int)gameTime).ToString();
 
         if (leftBtn != null)
@@ -266,6 +268,13 @@ public class YSMSIngameMgr : MonoBehaviour
         }
         else
         {
+            gameTime -= Time.deltaTime;
+            timerText.text = ((int)gameTime).ToString();
+            if (Time.timeScale != 0.0f && (0.0f < gameTime && gameTime <= 60.0f))
+                timebarImg.transform.Translate(-0.055f, 0, 0);
+
+            CheckTimeStateFunc(gameTime);
+
             if (Input.GetKeyDown(KeyCode.LeftArrow))
                 LeftBtnFunc();
 
@@ -306,19 +315,19 @@ public class YSMSIngameMgr : MonoBehaviour
 
         }
 
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            Debug.Log(showLeftCharGroupObj.transform.position + ":" + bonusTextObj.transform.position);
-            Debug.Log(showLeftCharGroupObj.transform.localPosition + ":" + bonusTextObj.transform.localPosition);
+        //if (Input.GetKeyDown(KeyCode.G))
+        //{
+        //    Debug.Log(showLeftCharGroupObj.transform.position + ":" + bonusTextObj.transform.position);
+        //    Debug.Log(showLeftCharGroupObj.transform.localPosition + ":" + bonusTextObj.transform.localPosition);
 
-        }
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            //for(int ii = 0;ii<spawnList.Count;ii++)
-            //    Debug.Log(spawnList[ii].transform.position.y);
-            //Debug.Log(spawnList[8].transform.position.y);
-            Debug.Log(spawnList.Count + " : " + posArray.Length);
-        }
+        //}
+        //if (Input.GetKeyDown(KeyCode.H))
+        //{
+        //    //for(int ii = 0;ii<spawnList.Count;ii++)
+        //    //    Debug.Log(spawnList[ii].transform.position.y);
+        //    //Debug.Log(spawnList[8].transform.position.y);
+        //    Debug.Log(spawnList.Count + " : " + posArray.Length);
+        //}
 
     }
 
@@ -486,51 +495,14 @@ public class YSMSIngameMgr : MonoBehaviour
         if (gameTime <= 0.0f) return;
         if (0.0f < falseTimer) return;
 
-        YSMSCharNode firstCharNode = spawnList[0].GetComponent<YSMSCharNode>();
+        firstCharNode = spawnList[0].GetComponent<YSMSCharNode>();
         if (firstCharNode.isMove) return;
 
         if (firstCharNode.charImgIndex == leftArray[0] || firstCharNode.charImgIndex == leftArray[1] ||
             firstCharNode.charImgIndex == leftArray[2] || firstCharNode.charImgIndex == (int)YSMSCharType.YSMSBomb)
-        {   //편가르기에 성공했을 때
-            if (firstCharNode.charImgIndex == (int)YSMSCharType.YSMSBomb)
-            {
-                gameTime += 10.0f;
-                bombCount++;
-                if (maxTime <= gameTime)
-                    gameTime = maxTime;
-
-                timebarX = timebarImg.transform.position.x + (400.0f / 6.0f);
-                if (timebarX >= timebarPos.x)
-                    timebarX = timebarPos.x;
-                plusShowTimer = 1.0f;
-                timebarImg.transform.position = new Vector3(timebarX, timebarImg.transform.position.y, timebarImg.transform.position.z);
-                //SoundManager.instance.PlayerSound("Dingdong", 20.0f);
-            }
-            monsterCount++;
-            comboCount++;
-            ComboTextFunc(comboCount);
-            TransformFunc(randomTransformCount);
-            checkComboTimer = 1.0f;
-            if (firstCharNode.charImgIndex == 8)
-                isBonusHit = true;
-            AddScoreFunc();
-            SetLayerFunc();
-            UpdateLevelFunc();
-            firstCharNode.isMove = true;
-            firstCharNode.isLeft = true;
-            SoundManager.instance.PlayerSound("Whip", 0.4f);
-        }
+            ClassifyCorrectFunc(true);
         else
-        {   //편가르기에 실패했을 때
-            currentGuage -= 15.0f;
-            if (currentGuage <= 0.0f)
-                currentGuage = 0.0f;
-            guagebarImg.fillAmount = currentGuage / maxGuage;
-            firstCharNode.isMove = false;
-            falseTimer = setFalseTime;
-            firstCharNode.ErrorColorChangeFunc(true);
-            SoundManager.instance.PlayerSound("Fail");
-        }
+            ClassifyIncorrectFunc();
     }
 
     void RightBtnFunc()
@@ -539,51 +511,60 @@ public class YSMSIngameMgr : MonoBehaviour
         if (gameTime <= 0.0f) return;
         if (0.0f < falseTimer) return;
 
-        YSMSCharNode firstCharNode = spawnList[0].GetComponent<YSMSCharNode>();
+        firstCharNode = spawnList[0].GetComponent<YSMSCharNode>();
         if (firstCharNode.isMove) return;
 
         if (firstCharNode.charImgIndex == rightArray[0] || firstCharNode.charImgIndex == rightArray[1] ||
-            firstCharNode.charImgIndex == rightArray[2] || firstCharNode.charImgIndex == (int)YSMSCharType.YSMSBomb)
-        {
-            if (firstCharNode.charImgIndex == (int)YSMSCharType.YSMSBomb)
-            {
-                gameTime += 10.0f;
-                bombCount++;
-                if (maxTime <= gameTime)
-                    gameTime = maxTime;
-
-                timebarX = timebarImg.transform.position.x + (400.0f / 6.0f);
-                if (timebarX >= timebarPos.x)
-                    timebarX = timebarPos.x;
-                plusShowTimer = 1.0f;
-                timebarImg.transform.position = new Vector3(timebarX, timebarImg.transform.position.y, timebarImg.transform.position.z);
-                //SoundManager.instance.PlayerSound("Dingdong", 20.0f);
-            }
-            monsterCount++;
-            comboCount++;
-            ComboTextFunc(comboCount);
-            TransformFunc(randomTransformCount);
-            checkComboTimer = 1.0f;
-            if (firstCharNode.charImgIndex == 8)
-                isBonusHit = true;
-            AddScoreFunc();
-            SetLayerFunc();
-            UpdateLevelFunc();
-            firstCharNode.isMove = true;
-            firstCharNode.isLeft = false;
-            SoundManager.instance.PlayerSound("Whip", 0.4f);
-        }
+            firstCharNode.charImgIndex == rightArray[2] || firstCharNode.charImgIndex == (int)YSMSCharType.YSMSBomb) 
+            ClassifyCorrectFunc(false);
         else
-        {
-            currentGuage -= 15.0f;
-            if (currentGuage <= 0.0f)
-                currentGuage = 0.0f;
-            guagebarImg.fillAmount = currentGuage / maxGuage;
-            firstCharNode.isMove = false;
-            falseTimer = setFalseTime;
-            firstCharNode.ErrorColorChangeFunc(true);
-            SoundManager.instance.PlayerSound("Fail");
-        }
+            ClassifyIncorrectFunc();
+    }
+
+    void ClassifyCorrectFunc(bool isLeft)
+	{
+        if (firstCharNode.charImgIndex == (int)YSMSCharType.YSMSBomb)
+            GameTimePlusFunc();
+        monsterCount++;
+        comboCount++;
+        ComboTextFunc(comboCount);
+        TransformFunc(randomTransformCount);
+        checkComboTimer = 1.0f;
+        if (firstCharNode.charImgIndex == 8)
+            isBonusHit = true;
+        AddScoreFunc();
+        SetLayerFunc();
+        UpdateLevelFunc();
+        firstCharNode.isMove = true;
+        firstCharNode.isLeft = isLeft;
+        SoundManager.instance.PlayerSound("Whip", 0.4f);
+    }
+
+    void ClassifyIncorrectFunc()
+	{
+        currentGuage -= 15.0f;
+        if (currentGuage <= 0.0f)
+            currentGuage = 0.0f;
+        guagebarImg.fillAmount = currentGuage / maxGuage;
+        firstCharNode.isMove = false;
+        falseTimer = setFalseTime;
+        firstCharNode.ErrorColorChangeFunc(true);
+        SoundManager.instance.PlayerSound("Fail");
+    }
+
+    void GameTimePlusFunc()
+    {
+        gameTime += 10.0f;
+        bombCount++;
+        if (maxTime <= gameTime)
+            gameTime = maxTime;
+
+        timebarX = timebarImg.transform.position.x + (400.0f / 6.0f);
+        if (timebarX >= timebarMaxPos.x)
+            timebarX = timebarMaxPos.x;
+        plusShowTimer = 1.0f;
+        timebarImg.transform.position = new Vector3(timebarX, timebarImg.transform.position.y, timebarImg.transform.position.z);
+        //SoundManager.instance.PlayerSound("Dingdong", 20.0f);
     }
 
     void MakeNewCharFunc()
@@ -761,20 +742,54 @@ public class YSMSIngameMgr : MonoBehaviour
             pausePanelObj.SetActive(isPause);
 
         //일시정지 악용 방지
+        //캐릭터 비활성화
         foreach (GameObject charNode in spawnList)
             charNode.SetActive(!isPause);
 
-        
-        
-        //콤보를 껐다가 켜는 함수 -> 메모리 풀로 바꾸기
-        //GameObject
-
-
+        //콤보텍스트 비활성화
         if (isPause)
+		{
+            for (int ii = 0; ii < comboTextObj.transform.childCount; ii++)
+			{
+                if (comboTextObj.transform.GetChild(ii).gameObject.activeSelf)
+                {
+                    comboTextObj.transform.GetChild(ii).gameObject.SetActive(false);
+                    comboTextObj.transform.GetChild(ii).GetComponent<ComboText>().isPause = true;
+                    break;
+                }
+                else
+                    continue;
+			}
+		}
+        else
+		{
+            for (int ii = 0; ii < comboTextObj.transform.childCount; ii++)
+            {
+                tempComboText = comboTextObj.transform.GetChild(ii).GetComponent<ComboText>();
+                if (tempComboText.comboCount == comboCount && tempComboText.isPause)
+				{
+                    tempComboText.isPause = false;
+					comboTextObj.transform.GetChild(ii).gameObject.SetActive(true);
+                    tempComboText = null;
+                    break;
+				}
+				else
+					continue;
+            }
+        }
+
+
+		if (isPause)
             Time.timeScale = 0.0f;
         else
             Time.timeScale = 1.0f;
 
         MusicManager.instance.PauseResumeMusic(isPause);
     }
+
+
+    void CheckTimeStateFunc(float gameTime)
+	{
+
+	}
 }

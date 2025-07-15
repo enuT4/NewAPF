@@ -8,7 +8,8 @@ public class ComboText : MemoryPoolObject
     float effectTime = 0.0f;
 
     [SerializeField] internal Text comboText;
-    int comboCount = 0;
+    [HideInInspector] public int comboCount = 0;
+    [HideInInspector] public bool isPause = false;
 
     float textGrowSpeed = 600.0f;
     [SerializeField] internal Canvas sortLayerCanvas;
@@ -58,6 +59,7 @@ public class ComboText : MemoryPoolObject
 
     public void SetComboTextFunc(int combo)
     {
+        comboCount = combo;
         comboText.text = combo + " Combo";
     }
 
@@ -65,6 +67,7 @@ public class ComboText : MemoryPoolObject
     {
         comboText.fontSize = 100;
         effectTime = 0.0f;
+        comboCount = 0;
         ObjectReturn();
     }
 }
