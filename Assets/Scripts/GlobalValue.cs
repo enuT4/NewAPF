@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEditor.Build;
+//using UnityEditor.Build;
 using UnityEngine;
 
 public enum GameKind
@@ -19,8 +19,9 @@ public class GlobalValue : MonoBehaviour
 
     public static int g_UserGold;
     public static int g_UserGem;
+    public static int g_ExpPercent = 0;
 
-    public static int g_RiceCount;
+    public static int g_RiceCount = 5;
     public static int g_IsRiceTimerStart;
     public static int g_RiceCheckTime;
     public static int g_RiceCheckDate;
@@ -41,15 +42,16 @@ public class GlobalValue : MonoBehaviour
     public static int[] g_YSMSUpgradeLv = new int[3] { 0, 0, 0 };
     public static int g_YSMSBestScore = 0;
     public static int g_MyYSMSRank = 0;
-    public static int g_YSMSRegScore = 0;
-    public static int g_YSMSRegRank = 1;
+    public static int g_YSMSRegionScore = 0;
+    public static int g_YSMSRegionRank = 1;
     public static int g_YSMSTutSkipYN = 0;
+    public static int g_YSMSTempScore = 0;
 
     public static int[] g_SDJRUpgradeLv = new int[3] { 0, 0, 0 };
     public static int g_SDJRBestScore = 0;
     public static int g_MySDJRRank = 0;
-    public static int g_SDJRRegScore = 0;
-    public static int g_SDJRRegRank = 1;
+    public static int g_SDJRRegionScore = 0;
+    public static int g_SDJRRegionRank = 1;
     public static int g_SDJRTutSkipYN = 0;
 
     public static int g_TotalScore = 0;

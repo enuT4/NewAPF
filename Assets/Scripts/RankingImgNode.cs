@@ -23,6 +23,7 @@ public class RankingImgNode : MonoBehaviour
         if (!rankTxt) rankTxt = transform.Find("RankText").GetComponent<Text>();
         if (!nicknameTxt) nicknameTxt = transform.Find("NicknameText").GetComponent<Text>();
         if (!bestScoreTxt) bestScoreTxt = transform.Find("ScoreText").GetComponent<Text>();
+        if (!buttonSprite) buttonSprite = GetComponent<Image>();
     }
 
     //void Start() => StartFunc();

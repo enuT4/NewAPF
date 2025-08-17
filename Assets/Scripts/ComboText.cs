@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,9 +12,11 @@ public class ComboText : MemoryPoolObject
     [SerializeField] internal Text comboText;
     [HideInInspector] public int comboCount = 0;
     [HideInInspector] public bool isPause = false;
-
-    float textGrowSpeed = 600.0f;
+    float screenScaleRate = Screen.width / 1440.0f;
+    float textGrowSpeed;
     [SerializeField] internal Canvas sortLayerCanvas;
+    float[] comboFontSizeArray;
+    float tempFontSize;
 
     private void Awake()
     {
@@ -23,8 +27,11 @@ public class ComboText : MemoryPoolObject
     // Start is called before the first frame update
     void Start()
     {
-        comboText.fontSize = 100;
+        comboText.fontSize = 80;
         sortLayerCanvas.overrideSorting = true;
+        textGrowSpeed = 500.0f * screenScaleRate;
+        comboFontSizeArray = new float[3] { 160 * screenScaleRate, 140 * screenScaleRate, 140 * screenScaleRate };
+
     }
 
     // Update is called once per frame
@@ -33,27 +40,31 @@ public class ComboText : MemoryPoolObject
         effectTime += Time.deltaTime;
         if (effectTime < 0.2f)
         {
-            comboText.fontSize += (int)(Time.deltaTime * textGrowSpeed);
-            if (160 <= comboText.fontSize)
-                comboText.fontSize = 160;
-            sortLayerCanvas.sortingOrder = 7;
+            tempFontSize += Time.deltaTime * textGrowSpeed * screenScaleRate;
+            if (comboFontSizeArray[0] <= tempFontSize)
+                tempFontSize = comboFontSizeArray[0];
+            if (sortLayerCanvas.sortingOrder != 7)
+                sortLayerCanvas.sortingOrder = 7;
         }
-        else if (effectTime < 0.5f)
+        else if (effectTime < 0.4f)
         {
-            comboText.fontSize -= (int)(Time.deltaTime * textGrowSpeed * 0.2f);
-            if (comboText.fontSize <= 140)
-                comboText.fontSize = 140;
-            sortLayerCanvas.sortingOrder = 6;
+            tempFontSize -= Time.deltaTime * textGrowSpeed * screenScaleRate;
+            if (tempFontSize <= comboFontSizeArray[1])
+                tempFontSize = comboFontSizeArray[1];
+            if (sortLayerCanvas.sortingOrder != 6)
+                sortLayerCanvas.sortingOrder = 6;
         }
-        else if (effectTime < 0.8f)
+        else if (effectTime < 0.7f)
         {
-            comboText.fontSize = 140;
-            sortLayerCanvas.sortingOrder = 5;
+            tempFontSize = comboFontSizeArray[2];
+            if (sortLayerCanvas.sortingOrder != 5)
+                sortLayerCanvas.sortingOrder = 5;
         }
         else
         {
             ComboObjReturnFunc();
         }
+        comboText.fontSize = (int)tempFontSize;
     }
 
 
@@ -65,7 +76,7 @@ public class ComboText : MemoryPoolObject
 
     public void ComboObjReturnFunc()
     {
-        comboText.fontSize = 100;
+        comboText.fontSize = 80;
         effectTime = 0.0f;
         comboCount = 0;
         ObjectReturn();

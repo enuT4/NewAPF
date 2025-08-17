@@ -1,5 +1,7 @@
+using Enut4LJR;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -13,8 +15,7 @@ public enum MessageState
 
 public enum MessageYesNoKind
 {
-    YSMSPausePanel = 0,
-    SDJRPausePanel,
+    GotoReady,
     LobbyLogout,
     GotoLobby,
     YesNoKindCount
@@ -50,7 +51,11 @@ public class MessageBox : MonoBehaviour
     // Start is called before the first frame update
     void StartFunc()
     {
-        if (messageOKBtn != null) messageOKBtn.onClick.AddListener(() => gameObject.SetActive(false));
+        if (messageOKBtn != null) messageOKBtn.onClick.AddListener(() =>
+        {
+            SoundManager.instance.PlayerSound("Button");
+            gameObject.SetActive(false);
+        });
         if (messageYesBtn != null) messageYesBtn.onClick.AddListener(YesBtnFunc);
         if (messageNoBtn != null) messageNoBtn.onClick.AddListener(NoBtnFunc);
     }
@@ -84,54 +89,54 @@ public class MessageBox : MonoBehaviour
 
     void YesBtnFunc()
     {
+        SoundManager.instance.PlayerSound("Button");
         Time.timeScale = 1.0f;
         if (GlobalValue.g_MessYesNoKind == MessageYesNoKind.LobbyLogout)
         {
             GlobalValue.g_UniqueID = "";
             GlobalValue.g_Nickname = "";
-            GlobalValue.g_YSMSBestScore = -1;
-            GlobalValue.g_SDJRBestScore = -1;
-            GlobalValue.g_TotalScore = -1;
-            GlobalValue.g_UserGold = -1;
-            GlobalValue.g_UserGem = -1;
-            GlobalValue.g_RiceCount = -1;
-            GlobalValue.g_IsRiceTimerStart = -1;
-            GlobalValue.g_RiceCheckTime = -1;
-            GlobalValue.g_RiceCheckDate = -1;
+            GlobalValue.g_UserGold = 0;
+            GlobalValue.g_UserGem = 0;
+            GlobalValue.g_ExpPercent = 0;
+            GlobalValue.g_RiceCount = 0;
+            GlobalValue.g_IsRiceTimerStart = 0;
+            GlobalValue.g_RiceCheckTime = 0;
+            GlobalValue.g_RiceCheckDate = 0;
+            GlobalValue.g_YSMSBestScore = 0;
+            GlobalValue.g_SDJRBestScore = 0;
+            GlobalValue.g_TotalScore = 0;
             for (int ii = 0; ii < 3; ii++)
             {
-                GlobalValue.g_YSMSUpgradeLv[ii] = -1;
-                GlobalValue.g_SDJRUpgradeLv[ii] = -1;
+                GlobalValue.g_YSMSUpgradeLv[ii] = 0;
+                GlobalValue.g_SDJRUpgradeLv[ii] = 0;
             }
-            GlobalValue.g_YSMSTutSkipYN = -1;
-            GlobalValue.g_SDJRTutSkipYN = -1;
+            GlobalValue.g_YSMSTutSkipYN = 0;
+            GlobalValue.g_SDJRTutSkipYN = 0;
             GlobalValue.g_GMGOLD = 0;
             GlobalValue.g_GMGEM = 0;
             GlobalValue.g_GMRICE = 0;
             GlobalValue.g_MessYesNoKind = MessageYesNoKind.YesNoKindCount;
             SceneManager.LoadScene("TitleScene");
         }
-        else if (GlobalValue.g_MessYesNoKind == MessageYesNoKind.YSMSPausePanel)
+        else if (GlobalValue.g_MessYesNoKind == MessageYesNoKind.GotoReady)
         {
-            
-        }
-        else if (GlobalValue.g_MessYesNoKind == MessageYesNoKind.SDJRPausePanel)
-        {
+            if (GlobalValue.g_GameKind == GameKind.YSMS)
+            {
+                YSMSIngameMgr.spawnList.Clear();
+            }
+            else if (GlobalValue.g_GameKind == GameKind.SDJR)
+            {
 
+            }
+
+            SceneManager.LoadScene("ReadyScene");
         }
         gameObject.SetActive(false);
     }
 
     void NoBtnFunc()
     {
-        if (GlobalValue.g_MessYesNoKind == MessageYesNoKind.YSMSPausePanel)
-        {
-
-        }
-        else if (GlobalValue.g_MessYesNoKind == MessageYesNoKind.SDJRPausePanel)
-        {
-
-        }
+        SoundManager.instance.PlayerSound("Button");
         gameObject.SetActive(false);
     }
 }

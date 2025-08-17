@@ -1,3 +1,4 @@
+using Enut4LJR;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using UnityEngine.UI;
 
 public class TitleMgr : MonoBehaviour
 {
-    GameObject titleCanvas;
+    internal Image bgImg;
 
     [SerializeField] private Button gameStartBtn;
     GameObject loginPanelObj;
@@ -18,10 +19,13 @@ public class TitleMgr : MonoBehaviour
 
     void AwakeFunc()
     {
-        if (!titleCanvas) titleCanvas = GameObject.Find("Canvas").gameObject;
-        if (!gameStartBtn) gameStartBtn = titleCanvas.transform.Find("GameStartBtn").GetComponent<Button>();
+        if (!SoundManager.instance) SoundManager.instance.CallInstance();
+        if (!MusicManager.instance) MusicManager.instance.CallInstance();
 
-        if (!loginPanelObj) loginPanelObj = titleCanvas.transform.Find("LoginPanelObj").gameObject;
+        if (!bgImg) bgImg = GameObject.Find("Canvas").transform.Find("TitleImg").GetComponent<Image>();
+        if (!gameStartBtn) gameStartBtn = bgImg.transform.Find("GameStartBtn").GetComponent<Button>();
+
+        if (!loginPanelObj) loginPanelObj = GameObject.Find("Canvas").transform.Find("LoginPanelObj").gameObject;
         if (loginPanelObj.activeSelf) loginPanelObj.SetActive(false);
     }
 
@@ -29,7 +33,13 @@ public class TitleMgr : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (gameStartBtn != null) gameStartBtn.onClick.AddListener(() => loginPanelObj.SetActive(true));
+        if (gameStartBtn != null) gameStartBtn.onClick.AddListener(() =>
+        {
+            SoundManager.instance.PlayerSound("Button");
+            loginPanelObj.SetActive(true);
+        });
+
+        MusicManager.instance.PlayMusic("MainBGM");
     }
 
     //void Update() => UpdateFunc();
@@ -39,12 +49,13 @@ public class TitleMgr : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.G))
         {
-            isTest = !isTest;
+            GlobalValue.g_YSMSBestScore = 100;
+            NetworkMgr.inst.PushPacket(PacketType.YSMSBestScore);
         }
 
         if (Input.GetKeyDown(KeyCode.H))
         {
-            Debug.Log(Convert.ToInt32(isTest));
+
         }
 
 

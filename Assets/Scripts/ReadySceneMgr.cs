@@ -1,3 +1,4 @@
+using Enut4LJR;
 using JetBrains.Annotations;
 using PlayFab;
 using PlayFab.ClientModels;
@@ -6,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using Unity.VisualScripting;
-using UnityEditor.Build.Content;
+//using UnityEditor.Build.Content;
 using UnityEngine;
 using UnityEngine.Analytics;
 using UnityEngine.SceneManagement;
@@ -32,7 +33,7 @@ public class ReadySceneMgr : MonoBehaviour
     [SerializeField] internal Text superAmTxt;
 
     [Header("-------- Item Button --------")]
-    internal Button[] itemBtns = new Button[4];
+    [SerializeField]internal Button[] itemBtns = new Button[4];
     [SerializeField] internal Button item1Btn;
     [SerializeField] internal Button item2Btn;
     [SerializeField] internal Button item3Btn;
@@ -69,6 +70,7 @@ public class ReadySceneMgr : MonoBehaviour
 
     bool isTutorialSkipOnOff = false;
     string gameName = "";
+    float bgmFadeOutTimer = 0.0f;
 
     [Header("-------- Rice Count --------")]
     [SerializeField] internal Text gameStartRiceTxt;
@@ -83,12 +85,18 @@ public class ReadySceneMgr : MonoBehaviour
     bool isRiceTimerStart = false;
     bool isDayChange = false;
 
-    ReadySceneMgr inst;
+    public static ReadySceneMgr inst;
+
+
+    [SerializeField] internal Button riceBtn;
+
 
     void Awake() => AwakeFunc();
 
     void AwakeFunc()
     {
+        if (!SoundManager.instance) SoundManager.instance.CallInstance();
+        if (!MusicManager.instance) MusicManager.instance.CallInstance();
 
         #region UI 연결
         if (!upgradeCanvasObj) upgradeCanvasObj = GameObject.Find("Canvas").gameObject;
@@ -110,10 +118,13 @@ public class ReadySceneMgr : MonoBehaviour
         if (!item2Btn) item2Btn = upgradeCanvasObj.transform.Find("Item2Btn").GetComponent<Button>();
         if (!item3Btn) item3Btn = upgradeCanvasObj.transform.Find("Item3Btn").GetComponent<Button>();
         if (!item4Btn) item4Btn = upgradeCanvasObj.transform.Find("Item4Btn").GetComponent<Button>();
-        for (int ii = 0; ii < itemBtns.Length; ii++) itemBtns[ii] = upgradeCanvasObj.transform.Find("Item" + (ii + 1) + "Btn").GetComponent<Button>();
-        for (int ii = 0; ii < itemBtnSpriteGroupObj.Length; ii++) itemBtnSpriteGroupObj[ii] = itemBtns[ii].transform.GetChild(2).gameObject;
+        for (int ii = 0; ii < itemBtns.Length; ii++)
+            itemBtns[ii] = upgradeCanvasObj.transform.Find("Item" + (ii + 1) + "Btn").GetComponent<Button>();
+        for (int ii = 0; ii < itemBtnSpriteGroupObj.Length; ii++)
+            itemBtnSpriteGroupObj[ii] = itemBtns[ii].transform.GetChild(1).gameObject;
         if (!charShopBtn) charShopBtn = upgradeCanvasObj.transform.Find("CharShopBtn").GetComponent<Button>();
         if (!gameStartBtn) gameStartBtn = upgradeCanvasObj.transform.Find("GameStartBtn").GetComponent<Button>();
+        if (!gameStartRiceTxt) gameStartRiceTxt = gameStartBtn.transform.GetChild(0).GetComponent<Text>();
 
         if (!gameNameTxt) gameNameTxt = upgradeCanvasObj.transform.Find("Label").transform.GetChild(0).GetComponent<Text>();
         if (!userGoldTxt) userGoldTxt = upgradeCanvasObj.transform.Find("UserGoldText").GetComponent<Text>();
@@ -127,7 +138,7 @@ public class ReadySceneMgr : MonoBehaviour
         if (!rankingPanelObj) rankingPanelObj = upgradeCanvasObj.transform.Find("RankingPanel").gameObject;
         if (!upgradePanelObj) upgradePanelObj = upgradeCanvasObj.transform.Find("UpgradePanel").gameObject;
         if (upgradePanelObj != null) ugPanel = upgradePanelObj.GetComponent<UpgradePanel>();
-        
+
         for (int ii = 0; ii < itemCostTxtArr.Length; ii++)
         {
             if (!itemCostTxtArr[ii])
@@ -135,7 +146,7 @@ public class ReadySceneMgr : MonoBehaviour
                     "Btn").transform.GetChild(0).transform.GetChild(1).GetComponent<Text>();
             if (!checkImg[ii])
                 checkImg[ii] = upgradeCanvasObj.transform.Find("Item" + (ii + 1) +
-                    "Btn").transform.GetChild(1).GetComponent<Image>();
+                    "Btn").transform.GetChild(2).GetComponent<Image>();
         }
 
         for (int ii = 0; ii < itemBtns.Length; ii++)
@@ -156,6 +167,7 @@ public class ReadySceneMgr : MonoBehaviour
     // Start is called before the first frame update
     void StartFunc()
     {
+        CalculateTimeFunc();
         CheckGameName();
         UpgradeUpdate();
 
@@ -168,8 +180,16 @@ public class ReadySceneMgr : MonoBehaviour
         for (int ii = 0; ii < itemCostTxtArr.Length; ii++)
             itemCostTxtArr[ii].text = itemCostArr[ii].ToString();
 
-        if (backBtn != null) backBtn.onClick.AddListener(() => SceneManager.LoadScene("LobbyScene"));
-        if (seeRankingBtn != null) seeRankingBtn.onClick.AddListener(() => rankingPanelObj.SetActive(true));
+        if (backBtn != null) backBtn.onClick.AddListener(() =>
+        {
+            SoundManager.instance.PlayerSound("Button");
+            SceneManager.LoadScene("LobbyScene");
+        });
+        if (seeRankingBtn != null) seeRankingBtn.onClick.AddListener(() =>
+        {
+            SoundManager.instance.PlayerSound("Button");
+            rankingPanelObj.SetActive(true);
+        });
 
         if (bonusUpBtn != null)
             bonusUpBtn.onClick.AddListener(() => { UpBtnFunc(UpgradeKind.Bonus); });
@@ -177,20 +197,22 @@ public class ReadySceneMgr : MonoBehaviour
             feverUpBtn.onClick.AddListener(() => { UpBtnFunc(UpgradeKind.Fever); });
         if (superUpBtn != null)
             superUpBtn.onClick.AddListener(() => { UpBtnFunc(UpgradeKind.Super); });
-        
 
-        for (int ii = 0; ii < itemBtns.Length; ii++)
-        {
-            itemBtns[ii].onClick.AddListener(() =>
-            {
-                ItemBtnFunc(ii);
-                CalculateItemCost();
-            });
-        }
+
+        if (itemBtns[0] != null)
+            itemBtns[0].onClick.AddListener(() => { ItemBtnFunc(0); });
+        if (itemBtns[1] != null)
+            itemBtns[1].onClick.AddListener(() => { ItemBtnFunc(1); });
+        if (itemBtns[2] != null)
+            itemBtns[2].onClick.AddListener(() => { ItemBtnFunc(2); });
+        if (itemBtns[3] != null)
+            itemBtns[3].onClick.AddListener(() => { ItemBtnFunc(3); });
+
 
         if (charShopBtn != null)
             charShopBtn.onClick.AddListener(() =>
             {
+                SoundManager.instance.PlayerSound("Button");
                 messageBoxObj.SetActive(true);
                 msgBox.SetMessageText("미구현 알림", "다음 업데이트를 기다려주세요 ㅠ0ㅠ", MessageState.OK);
             });
@@ -207,21 +229,55 @@ public class ReadySceneMgr : MonoBehaviour
         tempYMD = GlobalValue.g_RiceCheckDate;
 
         GetMyRanking(GlobalValue.g_GameKind);
+
+        if (riceBtn != null)
+            riceBtn.onClick.AddListener(() =>
+            {
+                SoundManager.instance.PlayerSound("Button");
+                GlobalValue.g_RiceCount++;
+                gameStartRiceTxt.text = GlobalValue.g_RiceCount.ToString();
+            });
     }
 
-    //void Update() => UpdateFunc();
+    void Update() => UpdateFunc();
 
     // Update is called once per frame
     void UpdateFunc()
     {
-        if (Input.GetKeyDown(KeyCode.G))
+        //if (Input.GetKeyDown(KeyCode.G))
+        //{
+        //    GlobalValue.g_RiceCount++;
+        //    gameStartRiceTxt.text = GlobalValue.g_RiceCount.ToString();
+        //}
+        //
+        //if (Input.GetKeyDown(KeyCode.H))
+        //{
+        //    GlobalValue.g_UserGold += 100;
+        //    userGoldTxt.text = GlobalValue.g_UserGold.ToString();
+        //}
+        //
+        //if (Input.GetKeyDown(KeyCode.J))
+        //{
+        //    Debug.Log(upgradeCanvasObj.transform.Find("Item1Btn").transform.GetChild(2));
+        //}
+
+        if (bgmFadeOutTimer > 0.0f)
         {
-            GetMyRanking(GlobalValue.g_GameKind);
+            bgmFadeOutTimer -= Time.deltaTime * 0.5f;
+            MusicManager.instance.SetVolume(bgmFadeOutTimer);
+            if (bgmFadeOutTimer <= 0.0f)
+            {
+                bgmFadeOutTimer = 0.0f;
+                GlobalValue.musicVolume = 1.0f;
+                MusicManager.instance.StopMusic();
+                SceneManager.LoadScene(gameName + "InGameScene");
+            }
         }
     }
 
     void UpBtnFunc(UpgradeKind ugKind)
     {
+        SoundManager.instance.PlayerSound("Button");
         ugPanel.ugKind = ugKind;
         upgradePanelObj.SetActive(true);
     }
@@ -280,12 +336,14 @@ public class ReadySceneMgr : MonoBehaviour
 
     void ItemBtnFunc(int itemNum)
     {
+        SoundManager.instance.PlayerSound("Button");
         isItemChecked[itemNum] = !isItemChecked[itemNum];
-
+        checkImg[itemNum].gameObject.SetActive(isItemChecked[itemNum]);
         if (isItemChecked[itemNum])
             itemInfoTxt.text = itemInfo[itemNum];
         else
             itemInfoTxt.text = "아이템을 선택해서 플레이 할 수 있어요~";
+        CalculateItemCost();
     }
 
     void CalculateItemCost()
@@ -321,6 +379,9 @@ public class ReadySceneMgr : MonoBehaviour
             UpgradeAmountUpdate(GlobalValue.g_SDJRUpgradeLv[0], GlobalValue.g_SDJRUpgradeLv[1], GlobalValue.g_SDJRUpgradeLv[2]);
             UpgradeLevelUpdate(GlobalValue.g_SDJRUpgradeLv[0], GlobalValue.g_SDJRUpgradeLv[1], GlobalValue.g_SDJRUpgradeLv[2]);
         }
+
+        userGoldTxt.text = GlobalValue.g_UserGold.ToString();
+        userGemTxt.text = GlobalValue.g_UserGem.ToString();
     }
 
     void UpgradeLevelUpdate(int bonusLv, int feverLv, int superLv)
@@ -415,6 +476,7 @@ public class ReadySceneMgr : MonoBehaviour
 
     void CheckGameStart()
     {
+        SoundManager.instance.PlayerSound("Button");
         if (goldVal < 0 || gemVal < 0)
         {
             messageBoxObj.SetActive(true);
@@ -448,10 +510,15 @@ public class ReadySceneMgr : MonoBehaviour
 
             NetworkMgr.inst.PushPacket(PacketType.UserMoney);
 
-            if (!isTutorialSkipOnOff)
-                SceneManager.LoadScene("TutorialScene");
-            else
-                SceneManager.LoadScene(gameName + "InGameScene");
+            //MusicManager.instance.StopMusic();
+            SoundManager.instance.PlayerSound("GameStart");
+            bgmFadeOutTimer = 1.0f;
+
+            //수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ
+            //if (!isTutorialSkipOnOff)
+            //    SceneManager.LoadScene("TutorialScene");
+            //else
+            //    SceneManager.LoadScene(gameName + "InGameScene");
         }
 
 

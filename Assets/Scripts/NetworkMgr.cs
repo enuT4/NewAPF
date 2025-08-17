@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using PlayFab;
 using PlayFab.ClientModels;
-using UnityEditor.PackageManager;
+//using UnityEditor.PackageManager;
 
 public enum PacketType
 {
@@ -231,8 +231,8 @@ public class NetworkMgr : MonoBehaviour
             {
                 new StatisticUpdate()
                 {
-                    StatisticName = "YSMSRegScore",
-                    Value = GlobalValue.g_YSMSRegScore,
+                    StatisticName = "YSMSRegionScore",
+                    Value = GlobalValue.g_YSMSRegionScore,
                 },
             }
         };
@@ -316,8 +316,8 @@ public class NetworkMgr : MonoBehaviour
             {
                 new StatisticUpdate()
                 {
-                    StatisticName = "SDJRRegScore",
-                    Value = GlobalValue.g_SDJRRegScore,
+                    StatisticName = "SDJRRegionScore",
+                    Value = GlobalValue.g_SDJRRegionScore,
                 },
             }
         };

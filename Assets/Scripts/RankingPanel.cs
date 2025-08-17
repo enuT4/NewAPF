@@ -1,9 +1,11 @@
+using Enut4LJR;
 using PlayFab;
 using PlayFab.ClientModels;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -48,13 +50,19 @@ public class RankingPanel : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (closePanelBtn != null) closePanelBtn.onClick.AddListener(() => gameObject.SetActive(false));
+        if (closePanelBtn != null) closePanelBtn.onClick.AddListener(() =>
+        {
+            SoundManager.instance.PlayerSound("Button");
+            gameObject.SetActive(false);
+        });
         if (gameRankBtn != null) gameRankBtn.onClick.AddListener(() =>
         {
+            SoundManager.instance.PlayerSound("Button");
             TransformScrollView(true);
         });
         if (totalRankBtn != null) totalRankBtn.onClick.AddListener(() =>
         {
+            SoundManager.instance.PlayerSound("Button");
             TransformScrollView(false);
         });
 

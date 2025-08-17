@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using System;
 using UnityEngine.SceneManagement;
+using Enut4LJR;
 
 public class LoginPanel : MonoBehaviour
 {
@@ -70,15 +71,21 @@ public class LoginPanel : MonoBehaviour
         if (loginBtn != null) loginBtn.onClick.AddListener(LoginBtnFunc);
         if (loginSignUpBtn != null) loginSignUpBtn.onClick.AddListener(() =>
         {
+            SoundManager.instance.PlayerSound("Button");
             loginPanelObj.SetActive(false);
             signupPanelObj.SetActive(true);
         });
-        if (loginCloseBtn != null) loginCloseBtn.onClick.AddListener(() => gameObject.SetActive(false));
+        if (loginCloseBtn != null) loginCloseBtn.onClick.AddListener(() =>
+        {
+            SoundManager.instance.PlayerSound("Button");
+            gameObject.SetActive(false);
+        });
 
         //if (signupIDCfmBtn != null) signupIDCfmBtn.onClick.AddListener(IDConfirmFunc);
         if (signupCreateIDBtn != null) signupCreateIDBtn.onClick.AddListener(CreateIDFunc);
         if (signupCloseBtn != null) signupCloseBtn.onClick.AddListener(() =>
         {
+            SoundManager.instance.PlayerSound("Button");
             loginPanelObj.SetActive(true);
             signupPanelObj.SetActive(false);
         });
@@ -121,6 +128,7 @@ public class LoginPanel : MonoBehaviour
     }
     void LoginBtnFunc()         //로그인 함수
     {
+        SoundManager.instance.PlayerSound("Button");
         lIDStr = loginIDInputField.text;
         lPWStr = loginPWInputField.text;
         lIDStr = lIDStr.Trim();
@@ -302,6 +310,7 @@ public class LoginPanel : MonoBehaviour
 
     void CreateIDFunc()         //아이디 생성 함수
     {
+        SoundManager.instance.PlayerSound("Button");
         suIDStr = signupIDInputField.text;
         suPWStr = signupPWInputField.text;
         suPWCfmStr = signupPWCfmInputField.text;

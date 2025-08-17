@@ -1,3 +1,4 @@
+using Enut4LJR;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -36,14 +37,18 @@ public class PausePanel : MonoBehaviour
         if (continueBtn != null)
             continueBtn.onClick.AddListener(() =>
             {
+                SoundManager.instance.PlayerSound("Button");
                 //this.gameObject.SetActive(false);
                 //게임 일시정지 풀렸을 때 콤보 및 시간 재개 함수
-                YSMSIngameMgr.inst.PauseBtnFunc(false);
+                if (GlobalValue.g_GameKind == GameKind.YSMS)
+                    YSMSIngameMgr.inst.PauseBtnFunc(false);
+
             });
 
         if (restartBtn != null)
             restartBtn.onClick.AddListener(() =>
             {
+                SoundManager.instance.PlayerSound("Button");
                 msgBoxObj.SetActive(true);
                 msgBox.SetMessageText("경고 알림", "게임을 나가면 기록이 저장되지 않아요 ㅠ0ㅠ\n" +
                     "그래도 다시 하시겠어요?", MessageState.YesNo);
@@ -54,6 +59,7 @@ public class PausePanel : MonoBehaviour
         if (gamehelpBtn != null)
             gamehelpBtn.onClick.AddListener(() =>
             {
+                SoundManager.instance.PlayerSound("Button");
                 if (gamehelpPanelObj != null)
                     gamehelpPanelObj.SetActive(true);
             });
@@ -61,6 +67,7 @@ public class PausePanel : MonoBehaviour
         if (gotolobbyBtn != null)
             gotolobbyBtn.onClick.AddListener(() =>
             {
+                SoundManager.instance.PlayerSound("Button");
                 msgBoxObj.SetActive(true);
                 msgBox.SetMessageText("경고 알림", "게임을 나가면 기록이 저장되지 않아요 ㅠ0ㅠ\n" +
                     "그래도 다시 하시겠어요?", MessageState.YesNo);
@@ -70,7 +77,8 @@ public class PausePanel : MonoBehaviour
         if (gamehelpPanelCloseBtn != null)
             gamehelpPanelCloseBtn.onClick.AddListener(() =>
             {
-                if(gamehelpPanelObj != null)
+                SoundManager.instance.PlayerSound("Button");
+                if (gamehelpPanelObj != null)
                     gamehelpPanelObj.SetActive(false);
             });
 

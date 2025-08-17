@@ -17,6 +17,7 @@ public class BonusText : MemoryPoolObject
     Color thisColor;
     Outline thisOutline;
     Color outlineColor;
+    float screenScale;
 
     public static BonusText inst;
 
@@ -42,6 +43,10 @@ public class BonusText : MemoryPoolObject
         if (GlobalValue.g_GameKind == GameKind.SDJR)
             moveVelocity /= 10.0f;
 
+
+        screenScale = Screen.width / 1440.0f;
+        thisText.gameObject.transform.localPosition = new Vector3(0.0f, 200.0f * screenScale, 0.0f);
+        thisText.fontSize = (int)(thisText.fontSize * screenScale);
         
     }
 

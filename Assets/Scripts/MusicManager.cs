@@ -52,6 +52,12 @@ namespace Enut4LJR
             audioSource.Play();
         }
 
+        internal void SetVolume(float volume)
+        {
+            if (!audioSource) return;
+            audioSource.volume = .3f * volume;
+        }
+
         internal void StopMusic()
         {
             audioSource.Stop();

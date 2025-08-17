@@ -1,5 +1,7 @@
+using Enut4LJR;
 using System.Collections;
 using System.Collections.Generic;
+//using UnityEditor.ShaderKeywordFilter;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -7,6 +9,7 @@ using UnityEngine.UI;
 public class LobbyMgr : MonoBehaviour
 {
     [SerializeField] internal GameObject lobbyCanvas;
+    [SerializeField] internal Image bgImg;
     [SerializeField] internal Button backBtn;
     [SerializeField] internal Text totalScoreTxt;
     
@@ -24,8 +27,10 @@ public class LobbyMgr : MonoBehaviour
     void AwakeFunc()
     {
         if (!lobbyCanvas) lobbyCanvas = GameObject.Find("Canvas").gameObject;
-        if (!backBtn) backBtn = lobbyCanvas.transform.Find("BackBtn").GetComponent<Button>();
+        if (!bgImg) bgImg = lobbyCanvas.transform.Find("BGImg").GetComponent<Image>();
+        if (!backBtn) backBtn = bgImg.transform.Find("BackBtn").GetComponent<Button>();
         if (!msgBoxObj) msgBoxObj = lobbyCanvas.transform.Find("MessageBox").gameObject;
+        
         msgBox = msgBoxObj.GetComponent<MessageBox>();
     }
 
@@ -41,6 +46,7 @@ public class LobbyMgr : MonoBehaviour
         if (backBtn != null) 
             backBtn.onClick.AddListener(() =>
         {
+            SoundManager.instance.PlayerSound("Button");
             msgBoxObj.SetActive(true);
             msgBox.SetMessageText("로그아웃 알림", "정말로 로그아웃 하시겠어요?", MessageState.YesNo);
             GlobalValue.g_MessYesNoKind = MessageYesNoKind.LobbyLogout;
@@ -79,6 +85,7 @@ public class LobbyMgr : MonoBehaviour
 
     void SetGameKind(GameKind gKind)
     {
+        SoundManager.instance.PlayerSound("Button");
         GlobalValue.g_GameKind = gKind;
         SceneManager.LoadScene("ReadyScene");
     }

@@ -20,4 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SDJRInGameScene.unity
     guid: e60f4fcd4938ac9408c8cabc11ae2972
+  - enabled: 1
+    path: Assets/Scenes/GameOverScene.unity
+    guid: ea5405de355007246be595cea96ee5a9
   m_configObjects: {}

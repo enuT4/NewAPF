@@ -1,3 +1,4 @@
+using Enut4LJR;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -62,7 +63,8 @@ public class UpgradePanel : MonoBehaviour
 
         for (int ii = 0; ii < upgradeAmountGroup.Length; ii++)
         {
-            if (!upgradeAmountGroup[ii]) upgradeAmountGroup[ii] = upgradeIconImg.transform.GetChild(ii).GetComponent<Text>();
+            if (!upgradeAmountGroup[ii])
+                upgradeAmountGroup[ii] = upgradeIconImg.transform.GetChild(ii).GetComponent<Text>();
         }
     }
 
@@ -78,7 +80,16 @@ public class UpgradePanel : MonoBehaviour
         if (upgradePanelCloseBtn != null)
             upgradePanelCloseBtn.onClick.AddListener(() =>
             {
+                SoundManager.instance.PlayerSound("Button");
                 ugKind = UpgradeKind.ugKindCount;
+                if (!upgradeLvUpBtn.IsInteractable())
+                    upgradeLvUpBtn.interactable = true;
+                if (!upgradeLvUpCostImg.gameObject.activeSelf)
+                    upgradeLvUpCostImg.gameObject.SetActive(true);
+                if (!upgradeLvUpCostTxt.gameObject.activeSelf)
+                    upgradeLvUpCostTxt.gameObject.SetActive(true);
+                if (upgradeLvMaxTxt.gameObject.activeSelf)
+                    upgradeLvMaxTxt.gameObject.SetActive(false);
                 this.gameObject.SetActive(false);
             });
 
@@ -350,6 +361,7 @@ public class UpgradePanel : MonoBehaviour
     {
         if (GlobalValue.g_UserGold - upgradeCost < 0)
         {
+            SoundManager.instance.PlayerSound("Button");
             messageBoxObj.SetActive(true);
             msgBox.SetMessageText("재화 부족 알림", "재화가 부족해요 ㅠ0ㅠ", MessageState.OK);
             return;
@@ -368,8 +380,9 @@ public class UpgradePanel : MonoBehaviour
                 GlobalValue.g_YSMSUpgradeLv[1]++;
             else if (ugKind == UpgradeKind.Super && GlobalValue.g_YSMSUpgradeLv[2] < 15)
                 GlobalValue.g_YSMSUpgradeLv[2]++;
-
+            
             NetworkMgr.inst.PushPacket(PacketType.YSMSUpgradeLv);
+            ReadySceneMgr.inst.UpgradeUpdate();
         }
         else if (GlobalValue.g_GameKind == GameKind.SDJR)
         {
@@ -381,7 +394,9 @@ public class UpgradePanel : MonoBehaviour
                 GlobalValue.g_SDJRUpgradeLv[2]++;
 
             NetworkMgr.inst.PushPacket(PacketType.SDJRUpgradeLv);
+            ReadySceneMgr.inst.UpgradeUpdate();
         }
+        SoundManager.instance.PlayerSound("LevelUp");
         UpdateUpgradeKind();
 
         //레벨업 이미지 보여주기

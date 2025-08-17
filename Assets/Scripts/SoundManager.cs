@@ -187,6 +187,7 @@ namespace Enut4LJR
                 if (soundSourceList[i].clip != null) soundSourceList[i].UnPause();
         }
 
+        /*
         public void PlaySound3D(string fileName, Transform tr)
         {
             if (!soundOnOff) return;
@@ -212,6 +213,7 @@ namespace Enut4LJR
                 if (thisSoundCount >= effectSoundCount) thisSoundCount = 0;
             }
         }
+        */
 
         public void PlayGUISound(string fileName, float volume = .2f)
         {
@@ -291,5 +293,22 @@ namespace Enut4LJR
             soundSourceList.Clear();
             Resources.UnloadUnusedAssets();
         }
+
+        public void PlayBGMAfterSound(string soundClipName, string bgmClipName, float bgmVolume = 0.2f)
+        {
+            StartCoroutine(PlaySequenceCoroutine(soundClipName, bgmClipName, bgmVolume));
+        }
+
+
+        private IEnumerator PlaySequenceCoroutine(string prevClipName, string nextClipName, float bgmVolume)
+        {
+            int prevIdx = PlaySoundIdx(prevClipName);
+            if (prevIdx >= 0)
+                yield return new WaitWhile(() => soundSourceList[prevIdx].isPlaying);
+
+            MusicManager.instance.PlayMusic(nextClipName);
+            //PlayBGM(nextClipName, bgmVolume);
+        }
+
     }
 }
