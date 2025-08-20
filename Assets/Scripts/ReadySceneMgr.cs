@@ -19,6 +19,7 @@ public class ReadySceneMgr : MonoBehaviour
     [SerializeField] internal Button backBtn;
     [SerializeField] internal Button seeRankingBtn;
     [SerializeField] internal Text myRankTxt;
+    internal GameObject bgImgObj;
     int myRank = 0;
 
     [Header("-------- Upgrade Button --------")]
@@ -63,7 +64,6 @@ public class ReadySceneMgr : MonoBehaviour
 
     [SerializeField] internal GameObject upgradePanelObj;
     UpgradePanel ugPanel;
-    [SerializeField] internal GameObject upgradeCanvasObj;
     [SerializeField] internal GameObject rankingPanelObj;
     [SerializeField] internal GameObject messageBoxObj;
     MessageBox msgBox;
@@ -99,53 +99,53 @@ public class ReadySceneMgr : MonoBehaviour
         if (!MusicManager.instance) MusicManager.instance.CallInstance();
 
         #region UI ¿¬°á
-        if (!upgradeCanvasObj) upgradeCanvasObj = GameObject.Find("Canvas").gameObject;
-        if (!backBtn) backBtn = upgradeCanvasObj.transform.Find("BackBtn").GetComponent<Button>();
-        if (!seeRankingBtn) seeRankingBtn = upgradeCanvasObj.transform.Find("SeeRankingBtn").GetComponent<Button>();
+        if (!bgImgObj) bgImgObj = GameObject.Find("Canvas").transform.Find("BGImg").gameObject;
+        if (!backBtn) backBtn = bgImgObj.transform.Find("BackBtn").GetComponent<Button>();
+        if (!seeRankingBtn) seeRankingBtn = bgImgObj.transform.Find("SeeRankingBtn").GetComponent<Button>();
         if (!myRankTxt) myRankTxt = seeRankingBtn.transform.GetChild(0).GetComponent<Text>();
 
-        if (!bonusUpBtn) bonusUpBtn = upgradeCanvasObj.transform.Find("BonusUpBtn").GetComponent<Button>();
+        if (!bonusUpBtn) bonusUpBtn = bgImgObj.transform.Find("BonusUpBtn").GetComponent<Button>();
         if (!bonusAmTxt) bonusAmTxt = bonusUpBtn.transform.GetChild(1).GetComponent<Text>();
         if (!bonusLvTxt) bonusLvTxt = bonusUpBtn.transform.GetChild(2).GetComponent<Text>();
-        if (!feverUpBtn) feverUpBtn = upgradeCanvasObj.transform.Find("FeverUpBtn").GetComponent<Button>();
+        if (!feverUpBtn) feverUpBtn = bgImgObj.transform.Find("FeverUpBtn").GetComponent<Button>();
         if (!feverAmTxt) feverAmTxt = feverUpBtn.transform.GetChild(1).GetComponent<Text>();
         if (!feverLvTxt) feverLvTxt = feverUpBtn.transform.GetChild(2).GetComponent<Text>();
-        if (!superUpBtn) superUpBtn = upgradeCanvasObj.transform.Find("SuperUpBtn").GetComponent<Button>();
+        if (!superUpBtn) superUpBtn = bgImgObj.transform.Find("SuperUpBtn").GetComponent<Button>();
         if (!superAmTxt) superAmTxt = superUpBtn.transform.GetChild(1).GetComponent<Text>();
         if (!superLvTxt) superLvTxt = superUpBtn.transform.GetChild(2).GetComponent<Text>();
 
-        if (!item1Btn) item1Btn = upgradeCanvasObj.transform.Find("Item1Btn").GetComponent<Button>();
-        if (!item2Btn) item2Btn = upgradeCanvasObj.transform.Find("Item2Btn").GetComponent<Button>();
-        if (!item3Btn) item3Btn = upgradeCanvasObj.transform.Find("Item3Btn").GetComponent<Button>();
-        if (!item4Btn) item4Btn = upgradeCanvasObj.transform.Find("Item4Btn").GetComponent<Button>();
+        if (!item1Btn) item1Btn = bgImgObj.transform.Find("Item1Btn").GetComponent<Button>();
+        if (!item2Btn) item2Btn = bgImgObj.transform.Find("Item2Btn").GetComponent<Button>();
+        if (!item3Btn) item3Btn = bgImgObj.transform.Find("Item3Btn").GetComponent<Button>();
+        if (!item4Btn) item4Btn = bgImgObj.transform.Find("Item4Btn").GetComponent<Button>();
         for (int ii = 0; ii < itemBtns.Length; ii++)
-            itemBtns[ii] = upgradeCanvasObj.transform.Find("Item" + (ii + 1) + "Btn").GetComponent<Button>();
+            itemBtns[ii] = bgImgObj.transform.Find("Item" + (ii + 1) + "Btn").GetComponent<Button>();
         for (int ii = 0; ii < itemBtnSpriteGroupObj.Length; ii++)
             itemBtnSpriteGroupObj[ii] = itemBtns[ii].transform.GetChild(1).gameObject;
-        if (!charShopBtn) charShopBtn = upgradeCanvasObj.transform.Find("CharShopBtn").GetComponent<Button>();
-        if (!gameStartBtn) gameStartBtn = upgradeCanvasObj.transform.Find("GameStartBtn").GetComponent<Button>();
+        if (!charShopBtn) charShopBtn = bgImgObj.transform.Find("CharShopBtn").GetComponent<Button>();
+        if (!gameStartBtn) gameStartBtn = bgImgObj.transform.Find("GameStartBtn").GetComponent<Button>();
         if (!gameStartRiceTxt) gameStartRiceTxt = gameStartBtn.transform.GetChild(0).GetComponent<Text>();
 
-        if (!gameNameTxt) gameNameTxt = upgradeCanvasObj.transform.Find("Label").transform.GetChild(0).GetComponent<Text>();
-        if (!userGoldTxt) userGoldTxt = upgradeCanvasObj.transform.Find("UserGoldText").GetComponent<Text>();
-        if (!userGemTxt) userGemTxt = upgradeCanvasObj.transform.Find("UserGemText").GetComponent<Text>();
-        if (!itemInfoTxt) itemInfoTxt = upgradeCanvasObj.transform.Find("ItemInfoText").GetComponent<Text>();
-        if (!userNickTxt) userNickTxt = upgradeCanvasObj.transform.Find("UserNameText").GetComponent<Text>();
-        if (!userLvTxt) userLvTxt = upgradeCanvasObj.transform.Find("UserNameText").GetComponent<Text>();
+        if (!gameNameTxt) gameNameTxt = bgImgObj.transform.Find("Label").transform.GetChild(0).GetComponent<Text>();
+        if (!userGoldTxt) userGoldTxt = bgImgObj.transform.Find("UserGoldText").GetComponent<Text>();
+        if (!userGemTxt) userGemTxt = bgImgObj.transform.Find("UserGemText").GetComponent<Text>();
+        if (!itemInfoTxt) itemInfoTxt = bgImgObj.transform.Find("ItemInfoText").GetComponent<Text>();
+        if (!userNickTxt) userNickTxt = bgImgObj.transform.Find("UserNameText").GetComponent<Text>();
+        if (!userLvTxt) userLvTxt = bgImgObj.transform.Find("UserNameText").GetComponent<Text>();
 
-        if (!messageBoxObj) messageBoxObj = upgradeCanvasObj.transform.Find("MessageBox").gameObject;
+        if (!messageBoxObj) messageBoxObj = GameObject.Find("Canvas").transform.Find("MessageBox").gameObject;
         if (messageBoxObj != null) msgBox = messageBoxObj.GetComponent<MessageBox>();
-        if (!rankingPanelObj) rankingPanelObj = upgradeCanvasObj.transform.Find("RankingPanel").gameObject;
-        if (!upgradePanelObj) upgradePanelObj = upgradeCanvasObj.transform.Find("UpgradePanel").gameObject;
+        if (!rankingPanelObj) rankingPanelObj = GameObject.Find("Canvas").transform.Find("RankingPanel").gameObject;
+        if (!upgradePanelObj) upgradePanelObj = GameObject.Find("Canvas").transform.Find("UpgradePanel").gameObject;
         if (upgradePanelObj != null) ugPanel = upgradePanelObj.GetComponent<UpgradePanel>();
 
         for (int ii = 0; ii < itemCostTxtArr.Length; ii++)
         {
             if (!itemCostTxtArr[ii])
-                itemCostTxtArr[ii] = upgradeCanvasObj.transform.Find("Item" + (ii + 1) + 
+                itemCostTxtArr[ii] = bgImgObj.transform.Find("Item" + (ii + 1) + 
                     "Btn").transform.GetChild(0).transform.GetChild(1).GetComponent<Text>();
             if (!checkImg[ii])
-                checkImg[ii] = upgradeCanvasObj.transform.Find("Item" + (ii + 1) +
+                checkImg[ii] = bgImgObj.transform.Find("Item" + (ii + 1) +
                     "Btn").transform.GetChild(2).GetComponent<Image>();
         }
 
@@ -476,6 +476,8 @@ public class ReadySceneMgr : MonoBehaviour
 
     void CheckGameStart()
     {
+        if (bgmFadeOutTimer > 0.0f) return;
+
         SoundManager.instance.PlayerSound("Button");
         if (goldVal < 0 || gemVal < 0)
         {
