@@ -280,6 +280,22 @@ public class SDJRIngameMgr : MonoBehaviour
             downKeyAction?.Invoke();
 
 
+        /*
+        if (Input.GetKeyDown(KeyCode.G))
+		{
+            int max = Mathf.Max(tileListArray[0].Count, tileListArray[1].Count, tileListArray[2].Count);
+            if (max > 0)
+			{
+                for (int ii = 0; ii < max; ii++)
+				{
+                    for (int jj = 0; jj < 3; jj++)
+					{
+                        if(tileListArray[jj].Count < max)
+					}
+				}
+			}
+		}
+        */
     }
 
     void CheckItemFunc()
@@ -794,9 +810,14 @@ public class SDJRIngameMgr : MonoBehaviour
         //tempTileNode = selectedGameObject.GetComponent<SDJRTileNode>();
         //if (tempTileNode.tileType != TileType.Normal)
         //    tempTileNode.isSpecialTilemoved = true;
-
+        tempTileIdx = selectedGameObject.GetComponent<SDJRTileNode>().tileIdx;
         tileIndexListArray[oldDirectionInt].RemoveAt(tileIndexListArray[oldDirectionInt].Count - 1);
-        tileIndexListArray[newDirectionInt].Add(tempTileNode.tileIdx);
+        tileIndexListArray[newDirectionInt].Add(tempTileIdx);
+        for (int test = 2; test >= 0; test--)
+		{
+            string tempstring = string.Join("][", tileIndexListArray[test]);
+            Debug.Log("[" + tempstring + "]");
+		}
 
 
         for (int ii = 0; ii < 3; ii++)
@@ -920,19 +941,17 @@ public class SDJRIngameMgr : MonoBehaviour
         //제거되어야 할 3라인의 타일들 선정
         for (int ii = 0; ii < 3; ii++)
         {
-            if (tileListArray[ii].Count < 3) continue;      //타일이 3개보다 적다면 터질 타일이 없으므로 계산 필요x
+            if (tileIndexListArray[ii].Count < 3) continue;      //타일이 3개보다 적다면 터질 타일이 없으므로 계산 필요x
 
             for (int jj = 0; jj < tileListArray[ii].Count - 2; jj++)        //리스트 한바퀴를 돌아서 제거해야할 타일 선정
             {
                 if (tileIndexListArray[ii][jj] == tileIndexListArray[ii][jj + 1] &&
                     tileIndexListArray[ii][jj + 1] == tileIndexListArray[ii][jj + 2])
                 {
-                    if (jj >= 1)
+                    if ((tileIndexListArray[ii][jj - 1] == 12 || tileIndexListArray[ii][jj - 1] == 13 ||
+                        tileIndexListArray[ii][jj - 1] == 14) && jj >= 1)
                     {
-                        if (tileIndexListArray[ii][jj - 1] == 12 ||
-                            tileIndexListArray[ii][jj - 1] == 13 || 
-                            tileIndexListArray[ii][jj - 1] == 14)
-                            deleteTileListArray[ii].Add(jj - 1);            //터트린 타일 위에 방해타일이 있다면 같이 터지도록
+                        deleteTileListArray[ii].Add(jj - 1);            //터트린 타일 위에 방해타일이 있다면 같이 터지도록
                     }
                     deleteTileListArray[ii].Add(jj);                        //터질 타일을 리스트에 등록
                     deleteTileListArray[ii].Add(jj + 1);                    //이후 콜백함수 한꺼번에 터트리도록
@@ -942,6 +961,7 @@ public class SDJRIngameMgr : MonoBehaviour
             deleteTileListArray[ii] = deleteTileListArray[ii].Distinct().ToList();      //중복으로 등록된 타일 제거
         }
 
+
         if (isComboPlus)
         {   //아이템의 효과가 아니라 일반 타일을 옮겨 터트렸을 때 콤보를 카운트하도록
             if (isSelectedTileinDeleteList() && selectedTile.GetComponent<SDJRTileNode>().tileType == TileType.Normal)
@@ -950,6 +970,8 @@ public class SDJRIngameMgr : MonoBehaviour
                 judgeComboCount = gameLevel + 2;
                 ComboTextFunc(comboCount);
             }
+            else
+                selectedTileObj = null;
         }
 
     }
@@ -972,13 +994,13 @@ public class SDJRIngameMgr : MonoBehaviour
             tempTileSelectType = selectedTile.GetComponent<SDJRTileNode>().tileType;
 
             for (int ii = 0; ii < 3; ii++)
-            {
-                for (int jj = delTileList[ii].Count; jj >= 0; jj--)
+			{
+                for (int jj = delTileList[ii].Count - 1; jj >= 0; jj--)
                 {
-                    Debug.Log(ii + " : " + jj + " : " + delTileList[ii][jj]);
+                    Debug.Log(ii + " : " + jj + " : ");
                     //본인이 터질 방해타일이면 나중에 한꺼번에 터뜨리기 위해 예외처리
                     tempDeleteTileType = tileList[ii][delTileList[ii][jj]].GetComponent<SDJRTileNode>().tileType;
-                    if (tempTileSelectType != TileType.Normal || tempDeleteTileType == TileType.GameOver ||
+                    if (tempDeleteTileType != TileType.Normal || tempDeleteTileType == TileType.GameOver ||
                         tempDeleteTileType == TileType.Bad1 || tempDeleteTileType == TileType.Bad2)
                         continue;
 
