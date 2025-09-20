@@ -146,5 +146,10 @@ public class SDJRTileNode : MemoryPoolObject
         tileSelectImg.SetActive(isSelected);
     }
 
+    public void DestroyFunc()
+	{
+        ObjectReturn();
+	}
+
     
 }

@@ -15,7 +15,9 @@ public class SDJRIngameMgr : MonoBehaviour
     internal Image guageBarImg;
     internal Text scoreText;
     internal Image timebarImg;
-    Vector2 timebarPos;
+    //Vector2 timebarPos;
+    Vector3 timebarMaxPos;
+    float timebarPosX;
     internal Text timerText;
     internal Button spawnLineBtn;
     internal Image spawnTutorialImg;
@@ -103,6 +105,8 @@ public class SDJRIngameMgr : MonoBehaviour
     //점수 변수
     int currentScore = 0;
     int gameLevel = 1;
+    GameObject tempBonusTextObj;
+    float bonusValue = 0;
 
     //아이템 변수
     bool isEraserItemBought = false;
@@ -133,9 +137,11 @@ public class SDJRIngameMgr : MonoBehaviour
 
     //콤보 관련 변수
     GameObject tempComboObj;
+    GameObject comboTextObj;
     ComboText tempComboText;
     int comboCount = 0;
     int judgeComboCount = 0;
+    Vector3 initComboScale = new Vector3(1.25f, 1.25f, 1.25f);
 
 
     //키 관련 변수
@@ -178,6 +184,7 @@ public class SDJRIngameMgr : MonoBehaviour
         if (!spawnTutorialImg) spawnTutorialImg = spawnLineBtn.transform.GetChild(0).GetComponent<Image>();
         if (!plus10SecImg) plus10SecImg = bgImgObj.transform.Find("Plus10SecImg").GetComponent<Image>();
         if (!tileGroupObj) tileGroupObj = bgImgObj.transform.Find("TileSpawnGroup").gameObject;
+        if (!comboTextObj) comboTextObj = bgImgObj.transform.Find("ComboSpawnGroup").gameObject;
 
         if (!pausePanelObj) pausePanelObj = GameObject.Find("Canvas").transform.Find("PausePanel").gameObject;
         if (!readyPanelObj) readyPanelObj = GameObject.Find("Canvas").transform.Find("ReadyPanel").gameObject;
@@ -314,7 +321,7 @@ public class SDJRIngameMgr : MonoBehaviour
         bombCount = 0;
         tileCount = 0;
         scoreText.text = currentScore.ToString("N0");
-        timebarPos = timebarImg.transform.position;
+        timebarMaxPos = timebarImg.transform.position;
         superFeverTimer = 0.0f;
     }
 
@@ -780,6 +787,7 @@ public class SDJRIngameMgr : MonoBehaviour
         oldDirectionInt = SelectedDirectionToInt(selectedKeyDirection);
         tileListArray[oldDirectionInt].RemoveAt(tileListArray[oldDirectionInt].Count - 1);
         tileListArray[newDirectionInt].Add(selectedGameObject);
+        Debug.Log(tileListArray[0].Count + "/" + tileListArray[1].Count + "/" + tileListArray[2].Count);
         movedTileNumber[0] = newDirectionInt;                           //SelectedTile의 열
         movedTileNumber[1] = tileListArray[newDirectionInt].Count - 1;  //SelectedTile의 행
 
@@ -967,6 +975,7 @@ public class SDJRIngameMgr : MonoBehaviour
             {
                 for (int jj = delTileList[ii].Count; jj >= 0; jj--)
                 {
+                    Debug.Log(ii + " : " + jj + " : " + delTileList[ii][jj]);
                     //본인이 터질 방해타일이면 나중에 한꺼번에 터뜨리기 위해 예외처리
                     tempDeleteTileType = tileList[ii][delTileList[ii][jj]].GetComponent<SDJRTileNode>().tileType;
                     if (tempTileSelectType != TileType.Normal || tempDeleteTileType == TileType.GameOver ||
@@ -980,42 +989,134 @@ public class SDJRIngameMgr : MonoBehaviour
                         {
                             tempDeleteTileType = tileList[1][delTileList[ii][jj]].GetComponent<SDJRTileNode>().tileType;
                             if (tempDeleteTileType == TileType.Bad1 || tempDeleteTileType == TileType.Bad2 || tempDeleteTileType == TileType.GameOver)
-                            {
-                                //DestroyTileFunc1();
-                            }
+                                DestroyTileFunc1(tileList[1], delTileList[ii][jj]);
                         }
                     }
+                    else if (ii == 1)
+					{   //가운데는 왼쪽 오른쪽 경우를 모두 생각해야 한다
+                        for (int kk = 0; kk < 3; kk = kk + 2)
+						{
+                            if (tileList[kk].Count > delTileList[ii][jj])
+							{
+                                tempDeleteTileType = tileList[kk][delTileList[ii][jj]].GetComponent<SDJRTileNode>().tileType;
+                                if (tempDeleteTileType == TileType.Bad1 || tempDeleteTileType == TileType.Bad2 || tempDeleteTileType == TileType.GameOver)
+                                    DestroyTileFunc1(tileList[kk], delTileList[ii][jj]);
+                            }
+						}
+					}
                 }
 
 
             }
         }
+
+        for (int ii = 0; ii < 3; ii++)
+		{
+            if (deleteTileListArray[ii].Count == 0) continue;
+
+            for (int jj = deleteTileListArray[ii].Count - 1; jj >= 0; jj--)
+			{
+                tempDeleteTileType = tileList[ii][delTileList[ii][jj]].GetComponent<SDJRTileNode>().tileType;
+                if (tempDeleteTileType == TileType.Bomb)
+				{
+                    bombCount++;
+                    gameTime += 10.0f;
+                    if (gameTime >= maxTime) gameTime = maxTime;
+                    plusShowTimer = 1.0f;
+                    timebarPosX = timebarImg.transform.position.x + (1440.0f / 60.0f) * 10.0f / screenScale;
+                    if (timebarPosX >= timebarMaxPos.x)
+                        timebarPosX = timebarMaxPos.x;
+                    timebarImg.transform.position = new Vector3(timebarPosX, timebarImg.transform.position.y, timebarImg.transform.position.z);
+				}
+                else if (tempDeleteTileType == TileType.Bonus)
+				{
+                    //보너스 점수 메모리 풀 생성
+                    tempBonusTextObj = MemoryPoolManager.instance.GetObject("BonusTextSpawnGroup");
+                    tempBonusTextObj.transform.position = tileList[ii][delTileList[ii][jj]].transform.position;
+                    tempBonusTextObj.transform.localScale = Vector3.one * 0.02f;
+                    tempBonusTextObj.GetComponent<BonusText>().SetScore(GameKind.SDJR);
+				}
+
+                DestroyTileFunc1(tileList[ii], delTileList[ii][jj]);
+			}
+
+
+		}
+
     }
 
-    void DestroyTileFunc1(GameObject destroyTileObj, List<GameObject> destroyTargetList, int destroyTargetInt)
+    void DestroyTileFunc1(List<GameObject> destroyTargetList, int destroyTargetInt)
     {
-        ExplosionEffectFunc(destroyTileObj);
-        
-        //해당 타일 파괴(objectreturn)
-        //타일 리스트의 removeat
+        ExplosionEffectFunc(destroyTargetList[destroyTargetInt]);
+        destroyTargetList[destroyTargetInt].GetComponent<SDJRTileNode>().DestroyFunc();
+        destroyTargetList.RemoveAt(destroyTargetInt);
         tileCount++;
         AddScoreFunc();
     }
 
     void ExplosionEffectFunc(GameObject explodeTile)
     {
-
+        Debug.Log("펑");             //수정수정수정
     }
 
-    void AddScoreFunc()
+    void AddScoreFunc(bool isBonus = false)
     {
+        bonusValue = 0;
+        if (superFeverTimer > 0.0f)
+            bonusValue = (372.0f * (100.0f + tempLevel * 5) * 0.01f * (100.0f + comboCount * 3) * 0.01f * feverRate);
+        else
+            bonusValue = (372.0f * (100.0f + gameLevel) * 0.01f * (100.0f + comboCount * 3) * 0.01f * feverRate);
 
+        if (isBonus) bonusValue += bonusScore;
+        currentScore += (int)bonusValue;
+        scoreText.text = currentScore.ToString("N0");
+
+        if (isHammerOn) guageAmount = 2.0f;
+        else guageAmount = 3.2f;
+
+        currentGuage += guageAmount;
+        if (maxGuage <= currentGuage)
+		{
+            currentGuage = 0.0f;
+
+            //폭탄 타일 생성 준비 완료로 변경
+            isSpawn[6] = true;
+		}
+
+        guageBarImg.fillAmount = currentGuage / maxGuage;
     }
 
-    void ComboTextFunc(int combo)
+    void ComboTextFunc(int tempCombo)
     {
+        for (int ii = 0; ii < comboTextObj.transform.childCount; ii++)
+		{
+            if (!comboTextObj.transform.GetChild(ii).gameObject.activeSelf)
+                continue;
+            else
+                comboTextObj.transform.GetChild(ii).GetComponent<ComboText>().ComboObjReturnFunc();
+		}
 
+        tempComboObj = MemoryPoolManager.instance.GetObject("ComboSpawnGroup");
+        tempComboObj.transform.position = comboTextObj.transform.position;
+        tempComboObj.transform.localScale = initComboScale;
+        tempComboObj.GetComponent<ComboText>().SetComboTextFunc(tempCombo);
+        tempComboObj.SetActive(true);
+
+
+        LevelUpdateFunc(tempCombo);
     }
+
+    void LevelUpdateFunc(int tempCombo)
+	{
+        if (6 <= gameLevel) return;
+        if (superFeverTimer > 0.0f) return;
+
+        if (tileCount > 550) gameLevel = 6;
+        else if (tileCount > 450) gameLevel = 5;
+        else if (tileCount > 300) gameLevel = 4;
+        else if (tileCount > 130) gameLevel = 3;
+        else if (tileCount > 30) gameLevel = 2;
+	}
 
 
     void HammerSelectFunc(KeyDirection direction)

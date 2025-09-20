@@ -610,10 +610,10 @@ public class YSMSIngameMgr : MonoBehaviour
                 isTimeShowArray[ii] = true;
         }
 
+        plusShowTimer = 1.0f;
         timebarX = timebarImg.transform.position.x + (1440.0f / 60.0f) * 10.0f / screenScale;
         if (timebarX >= timebarMaxPos.x)
             timebarX = timebarMaxPos.x;
-        plusShowTimer = 1.0f;
         timebarImg.transform.position = new Vector3(timebarX, timebarImg.transform.position.y, timebarImg.transform.position.z);
         //SoundManager.instance.PlayerSound("Dingdong", 20.0f);
     }
