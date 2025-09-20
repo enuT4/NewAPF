@@ -83,7 +83,7 @@ public class YSMSIngameMgr : MonoBehaviour
     GameObject readyPanelObj;
 
     //아이템
-    bool isSuperFeverOn = false;
+    bool isSuperFeverItemOn = false;
     bool isTransformTimerOn = false;
     int randomTransformCount = 0;
     int transformCount = 0;
@@ -95,11 +95,8 @@ public class YSMSIngameMgr : MonoBehaviour
     int bonusScore = 0;
     float feverRate = 1.0f;
     float superRate = 1.0f;
-    bool isBonutHit = false;
-    //Vector3 bonusTextPos;
     GameObject bonusTextObj;
     GameObject bonusClone;
-    BonusText bonusTxt;
 
     //[Header("-------- GameOver --------")]
     //게임 오버
@@ -442,7 +439,7 @@ public class YSMSIngameMgr : MonoBehaviour
         if (ReadySceneMgr.isItemChecked[0]) gameTime = 65.0f;
         if (ReadySceneMgr.isItemChecked[1]) transformItemTime = 3.0f;
         if (ReadySceneMgr.isItemChecked[2]) setFalseTime = 0.5f;
-        if (ReadySceneMgr.isItemChecked[3]) isSuperFeverOn = true;
+        if (ReadySceneMgr.isItemChecked[3]) isSuperFeverItemOn = true;
     }
 
     void CheckUpgradeRateFunc()
@@ -456,7 +453,7 @@ public class YSMSIngameMgr : MonoBehaviour
     public void GameStartAfterReadyFunc()
     {
         isGameStart = true;
-        if (isSuperFeverOn)
+        if (isSuperFeverItemOn)
             comboCount = 100;
     }
 

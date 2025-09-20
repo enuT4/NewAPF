@@ -91,8 +91,8 @@ public class ReadyPanel : MonoBehaviour
         }
         else if (GlobalValue.g_GameKind == GameKind.SDJR)
         {
-        
-        
+            
+            //MusicManager.instance.PlayMusic("SDJRIngameBGM");        //수정수정수정수정
         }
     }
 }
