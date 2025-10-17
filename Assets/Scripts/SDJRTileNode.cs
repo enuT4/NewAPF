@@ -7,14 +7,14 @@ using UnityEngine.UI;
 public enum TileType
 {
     Bomb = 0,
-    Normal,
-    Bonus,
-    Special1,       //지우개
-    Special2,       //해머
-    Special3,       //한줄
-    Bad1,           //좌우반전
-    Bad2,           //블록 가리기
-    GameOver,       //게임오버
+    Normal,         //1 ~ 7
+    Bonus,          //8
+    Special1,       //지우개, 9
+    Special2,       //해머, 10
+    Special3,       //한줄, 11
+    Bad1,           //좌우반전, 12
+    Bad2,           //블록 가리기, 13
+    GameOver,       //게임오버, 14
     TileTypeCount
 }
 
@@ -148,6 +148,9 @@ public class SDJRTileNode : MemoryPoolObject
 
     public void DestroyFunc()
 	{
+        if (badCountTimer > 0.0f) badCountTimer = 0.0f;
+        if (badCountImg.activeSelf) badCountImg.SetActive(false);
+
         ObjectReturn();
 	}
 
