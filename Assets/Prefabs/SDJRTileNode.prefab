@@ -302,6 +302,7 @@ MonoBehaviour:
   tileIdx: -1
   isSelected: 0
   tileType: 9
+  isSpecialTilemoved: 0
 --- !u!1 &2413100064497711836
 GameObject:
   m_ObjectHideFlags: 0

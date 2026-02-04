@@ -50,6 +50,7 @@ public class GameOverMgr : MonoBehaviour
 
     //점수 오름 연출을 위한 현재값 저장
     int currentScore = 0;
+    float floatCurrentGold = 0.0f;
     [SerializeField]int currentGold = 0;
     int scoreDifference = 0;
     int currentTotalScore = 0;
@@ -62,7 +63,9 @@ public class GameOverMgr : MonoBehaviour
     float differenceUpSpeed = 0.0f;
 
     string gameName = "";
-    bool[] isGetRegion = new bool[2];
+    bool isGetRegionScoreSuccess = false;
+    bool isNewRecord = false;
+
 
     void Awake() => AwakeFunc();
 
@@ -95,13 +98,6 @@ public class GameOverMgr : MonoBehaviour
             msgBox = messageBoxObj.GetComponent<MessageBox>();
             if (messageBoxObj.activeSelf) messageBoxObj.SetActive(false);
         }
-
-
-        for (int ii = 0; ii < isGetRegion.Length; ii++)
-        {
-            if (isGetRegion[ii])
-                isGetRegion[ii] = false;
-        }
     }
 
     // Start is called before the first frame update
@@ -117,10 +113,14 @@ public class GameOverMgr : MonoBehaviour
         });
 
         //연출을 위한 버튼 잠시 꺼두기
-        friendBtn.gameObject.SetActive(false);
-        okBtn.gameObject.SetActive(false);
-        upImg.gameObject.SetActive(false);
-        newRecordImg.gameObject.SetActive(false);
+        if (friendBtn != null && friendBtn.gameObject.activeSelf)
+            friendBtn.gameObject.SetActive(false);
+        if (okBtn != null && okBtn.gameObject.activeSelf)
+            okBtn.gameObject.SetActive(false);
+        if (upImg != null && upImg.gameObject.activeSelf)
+            upImg.gameObject.SetActive(false);
+        if (newRecordImg != null && newRecordImg.gameObject.activeSelf)
+            newRecordImg.gameObject.SetActive(false);
 
         userLevelExpText.text = GlobalValue.g_ExpPercent.ToString() + "%";
         userGoldText.text = currentGold.ToString("N0");
@@ -134,22 +134,25 @@ public class GameOverMgr : MonoBehaviour
         totalScoreText.text = currentTotalScore.ToString("N0");
         schoolInfoText.text = GlobalValue.g_SchoolName;
 
-        
+        if (isSendFriend) isSendFriend = false;
+        if (isGetRegionScoreSuccess) isGetRegionScoreSuccess = false;
+        if (isNewRecord) isNewRecord = false;
 
-        isSendFriend = false;
-
-        
     }
 
     // Update is called once per frame
     void Update()
     {
+        ShowGoldFunc();
         ShowScoreFunc();
         if (0.0f < delayTimer1)
         {
             delayTimer1 -= Time.deltaTime;
-            if (delayTimer1 <= 0.0f)
-                delayTimer2 = 1.5f;
+            if (delayTimer1 < 0.0f)
+            {
+                delayTimer1 = 0.0f;
+                delayTimer2 = 1.5f;                
+            }
         }
         else
         {
@@ -159,27 +162,22 @@ public class GameOverMgr : MonoBehaviour
                 delayTimer2 -= Time.deltaTime;
                 if (delayTimer2 <= 0.0f)
                 {
+                    delayTimer2 = 0.0f;
                     friendBtn.gameObject.SetActive(true);
                     okBtn.gameObject.SetActive(true);
                 }
             }
         }
 
-        if (isGetRegion[0] && isGetRegion[1])
-        {
-            if (gameName == "YSMS")
-            {
-                GlobalValue.g_YSMSRegionScore = regionScore + scoreDifference;
-                NetworkMgr.inst.PushPacket(PacketType.YSMSRegionScore);
-            }
-            else if (gameName == "SDJR")
-            {
-                GlobalValue.g_SDJRRegionScore = regionScore + scoreDifference;
-                NetworkMgr.inst.PushPacket(PacketType.SDJRRegionScore);
-            }
+        SaveNewRecordFunc();
 
-            isGetRegion[1] = false;
-        }
+        //if (Input.GetKeyDown(KeyCode.G))
+        //{
+        //    GlobalValue.g_YSMSRegionScore = 0;
+        //    NetworkMgr.inst.PushPacket(PacketType.YSMSRegionScore);
+        //    GlobalValue.g_YSMSBestScore = 0;
+        //    NetworkMgr.inst.PushPacket(PacketType.YSMSBestScore);
+        //}
 
     }
 
@@ -212,28 +210,28 @@ public class GameOverMgr : MonoBehaviour
         }
         else if (GlobalValue.g_GameKind == GameKind.SDJR)
         {
-            //gameName = "SDJR";
-            //levelBonus = SDJRIngameMgr.inst.gameLevel * 4;
-            //timeBonus = SDJRIngameMgr.inst.bombCount * 3;
-            //inSchoolCompetitionText.text = "<color=#ffff00>-위</color>\n" + GlobalValue.g_SDJRBestScore.ToString();
-            //regionCompetitionText.text = "<color=#ffff00>-위</color>  " + GlobalValue.g_SDJRRegionScore.ToString();
+            gameName = "SDJR";
+            levelBonus = SDJRIngameMgr.inst.gameLevel * 4;
+            timeBonus = SDJRIngameMgr.inst.bombCount * 3;
+            inSchoolCompetitionText.text = "<color=#ffff00>-위</color>\n" + GlobalValue.g_SDJRBestScore.ToString();
+            regionCompetitionText.text = "<color=#ffff00>-위</color>  " + GlobalValue.g_SDJRRegionScore.ToString();
 
-            ////보너스를 포함한 최종 스코어 계산
-            //if (int.MaxValue - 10 <= (SDJRIngameMgr.inst.currentScore * (1 + (float)((levelBonus + timeBonus) / 100.0f))))
-            //    resultScore = int.MaxValue - 10;
-            //else
-            //    resultScore = (int)(SDJRIngameMgr.inst.currentScore * (1 + (float)((levelBonus + timeBonus) / 100.0f)));
+            //보너스를 포함한 최종 스코어 계산
+            if (int.MaxValue - 10 <= (SDJRIngameMgr.inst.currentScore * (1 + (float)((levelBonus + timeBonus) / 100.0f))))
+                resultScore = int.MaxValue - 10;
+            else
+                resultScore = (int)(SDJRIngameMgr.inst.currentScore * (1 + (float)((levelBonus + timeBonus) / 100.0f)));
 
-            //rewardGold = (int)(500 * (1 + (float)(3 * ((levelBonus - 1) + timeBonus) / 100.0f)));
-            //rewardGoldText.text = rewardGold.ToString();
+            rewardGold = (int)(500 * (1 + (float)(3 * ((levelBonus - 1) + timeBonus) / 100.0f)));
+            rewardGoldText.text = rewardGold.ToString();
 
-            //if (resultScore <= GlobalValue.g_SDJRBestScore)
-            //    bestScoreText.text = GlobalValue.g_SDJRBestScore.ToString("N0");
-            //else
-            //    bestScoreText.text = resultScore.ToString("N0");
+            if (resultScore <= GlobalValue.g_SDJRBestScore)
+                bestScoreText.text = GlobalValue.g_SDJRBestScore.ToString("N0");
+            else
+                bestScoreText.text = resultScore.ToString("N0");
 
-            //currentBestScore = GlobalValue.g_SDJRBestScore;
-            //myRank = GlobalValue.g_MySDJRRank;
+            currentBestScore = GlobalValue.g_SDJRBestScore;
+            myRank = GlobalValue.g_MySDJRRank;
         }
 
         //골드 값 저장
@@ -254,6 +252,10 @@ public class GameOverMgr : MonoBehaviour
         GetRegionScoreFunc(gameName);
         SoundManager.instance.PlayBGMAfterSound("Clear", "MainBGM");
 
+        //골드 연출 초기화
+        currentGold = GlobalValue.g_UserGold - rewardGold;
+        floatCurrentGold = currentGold;
+
         if (scoreDifference > 0)
         {
             if (gameName == "YSMS")
@@ -269,8 +271,8 @@ public class GameOverMgr : MonoBehaviour
             myRank = 0;
             GlobalValue.g_TotalScore += scoreDifference;
             NetworkMgr.inst.PushPacket(PacketType.TotalBestScore);
-            differenceUpSpeed = scoreDifference / 1.5f;
-            isGetRegion[1] = true;
+            differenceUpSpeed = (float)scoreDifference / 1.5f;
+            isNewRecord = true;
             SoundManager.instance.PlayerSound("Wow");
             
         }
@@ -297,7 +299,7 @@ public class GameOverMgr : MonoBehaviour
             (result) =>
             {
                 regionScore = result.Leaderboard[0].StatValue;
-                isGetRegion[0] = true;
+                isGetRegionScoreSuccess = true;
             },
             (error) =>
             {
@@ -314,17 +316,19 @@ public class GameOverMgr : MonoBehaviour
         msgBox.SetMessageText("미구현 알림", "다음 업데이트를 기다려주세요 ㅠ0ㅠ", MessageState.OK);
     }
 
+    void ShowGoldFunc()
+    {   //골드 올라가는 연출
+        if (currentGold >= GlobalValue.g_UserGold) return;
+
+        floatCurrentGold += Time.deltaTime * goldUpSpeed;
+
+        floatCurrentGold = Mathf.Min(floatCurrentGold, GlobalValue.g_UserGold);
+        currentGold = (int)floatCurrentGold;
+        userGoldText.text = currentGold.ToString("N0");
+    }
+
     void ShowScoreFunc()
     {
-        //골드 올라가는 연출
-        if (currentGold < GlobalValue.g_UserGold)
-        {
-            currentGold += (int)(Time.deltaTime * goldUpSpeed);
-            if (GlobalValue.g_UserGold <= currentGold)
-                currentGold = GlobalValue.g_UserGold;
-            userGoldText.text = currentGold.ToString("N0");
-        }
-
         //현재 점수 올라가는 연출
         currentScore += (int)(Time.deltaTime * currentScoreUpSpeed);
         if (resultScore <= currentScore)
@@ -416,7 +420,7 @@ public class GameOverMgr : MonoBehaviour
 
     void ShowRegionScore()
     {
-        if (!isGetRegion[0]) return;
+        if (!isGetRegionScoreSuccess) return;
 
         if (scoreDifference > 0)
         {
@@ -426,7 +430,7 @@ public class GameOverMgr : MonoBehaviour
                 if (GlobalValue.g_YSMSRegionScore <= regionScore)
                 {
                     regionScore = GlobalValue.g_YSMSRegionScore;
-                    isGetRegion[0] = false;
+                    isGetRegionScoreSuccess = false;
                 }
             }
             else if (gameName == "SDJR")
@@ -435,14 +439,39 @@ public class GameOverMgr : MonoBehaviour
                 if (GlobalValue.g_SDJRRegionScore <= regionScore)
                 {
                     regionScore = GlobalValue.g_SDJRRegionScore;
-                    isGetRegion[0] = false;
+                    isGetRegionScoreSuccess = false;
                 }
             }
         }
         else
             friendBtn.interactable = false;
 
-        regionCompetitionText.text = "<color=#ffff00>" + GlobalValue.g_YSMSRegionRank + "위</color>  " + regionScore.ToString("N0");
+        if (gameName == "YSMS")
+            regionCompetitionText.text = "<color=#ffff00>" + GlobalValue.g_MyYSMSRank + "위</color>  " + regionScore.ToString("N0");
+        else if (gameName == "SDJR")
+            regionCompetitionText.text = "<color=#ffff00>" + GlobalValue.g_MySDJRRank + "위</color>  " + regionScore.ToString("N0");
+
+        //regionCompetitionText.text = "<color=#ffff00>" + GlobalValue.g_YSMSRegionRank + "위</color>  " + regionScore.ToString("N0");
+
+    }
+
+    void SaveNewRecordFunc()
+    {   //서버 상태로 인해 느리게 업데이트가 될수도 있으니 업데이트에서 추적
+        if (isGetRegionScoreSuccess && isNewRecord)
+        {
+            if (gameName == "YSMS")
+            {
+                GlobalValue.g_YSMSRegionScore = regionScore + scoreDifference;
+                NetworkMgr.inst.PushPacket(PacketType.YSMSRegionScore);
+            }
+            else if (gameName == "SDJR")
+            {
+                GlobalValue.g_SDJRRegionScore = regionScore + scoreDifference;
+                NetworkMgr.inst.PushPacket(PacketType.SDJRRegionScore);
+            }
+
+            isNewRecord = false;
+        }
     }
 
 }

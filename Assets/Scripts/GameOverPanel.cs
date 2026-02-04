@@ -6,26 +6,28 @@ using UnityEngine.UI;
 public class GameOverPanel : MonoBehaviour
 {
 
-    internal Image gameoverImg;
-    internal Image timeupImg;
-    [SerializeField]float gameoverShowTimer = 0.0f;
+    [SerializeField] internal Image gameoverImg;
+    [SerializeField] internal Image timeupImg;
+    [SerializeField] float gameoverShowTimer = 0.0f;
 
 
     private void Awake()
     {
         if (!gameoverImg) gameoverImg = transform.Find("GameOverImg").GetComponent<Image>();
         if (!timeupImg) timeupImg = transform.Find("TimeUpImg").GetComponent<Image>();
+
+        if (gameoverImg != null && gameoverImg.gameObject.activeSelf)
+            gameoverImg.gameObject.SetActive(false);
+
+        if (timeupImg != null && timeupImg.gameObject.activeSelf)
+            timeupImg.gameObject.SetActive(false);
     }
 
 
     // Start is called before the first frame update
     void Start()
     {
-        if (gameoverImg != null && gameoverImg.gameObject.activeSelf)
-            gameoverImg.gameObject.SetActive(false);
-
-        if (timeupImg != null && timeupImg.gameObject.activeSelf)
-            timeupImg.gameObject.SetActive(false);
+        
     }
 
     void Update() => UpdateFunc();
@@ -43,13 +45,9 @@ public class GameOverPanel : MonoBehaviour
         }
     }
 
-    private void OnEnable()
-    {
-        gameoverShowTimer = 3.0f;
-    }
-
     public void TimeUpOrGameOver(bool isTimeUp)
     {
+        if (gameoverImg == null || timeupImg == null) return;
         if (isTimeUp)
         {
             gameoverImg.gameObject.SetActive(false);
@@ -60,6 +58,6 @@ public class GameOverPanel : MonoBehaviour
             gameoverImg.gameObject.SetActive(true);
             timeupImg.gameObject.SetActive(false);
         }
-
+        gameoverShowTimer = 3.0f;
     }
 }

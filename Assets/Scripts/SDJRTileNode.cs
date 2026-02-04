@@ -1,3 +1,4 @@
+using Enut4LJR;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -129,16 +130,19 @@ public class SDJRTileNode : MemoryPoolObject
         {   //좌우반전
             SDJRIngameMgr.inst.isReverse = true;
             SDJRIngameMgr.inst.ReverseForSeconds(5.0f);
+
         }
         else if (tileType == TileType.Bad2)
         {   //가리개
             SDJRIngameMgr.inst.isTileHide = true;
-            SDJRIngameMgr.inst.switchBool = true;
-            SDJRIngameMgr.inst.badTile2EffectTimer = 5.0f;
+            //SDJRIngameMgr.inst.switchBool = true;
+            SDJRIngameMgr.inst.CoverTileForSeconds(5.0f);
         }
         else return;
         //페널티 발동 -> 본인은 도움이 되지 않는 타일로 변신
-        
+        SoundManager.instance.PlayerSound("BadTile");
+
+
     }
 
     public void SelectOrDeselectFunc(bool isSelected)

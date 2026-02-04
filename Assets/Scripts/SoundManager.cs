@@ -11,7 +11,7 @@ namespace Enut4LJR
         private Dictionary<string, AudioClip> clipList = new Dictionary<string, AudioClip>();
 
         #region 효과음 최적화 변수
-        [SerializeField] private int effectSoundCount = 5; //지금은 5개 레이어
+        [SerializeField] private int effectSoundCount = 20;
         private int thisSoundCount = 0; //최대 5개까지 재생되에 제어(안드로이드 5개, PC는 무제한)
 
         //조건 아래 배열들은 effectSoundCount보다 커야 한다.
@@ -19,7 +19,7 @@ namespace Enut4LJR
         private List<AudioSource> soundSourceList = new List<AudioSource>();
 
         //각 차일드 오브젝트에 붙을 AudioSource Component 참조를 저장하기 위한 리스트
-        private float[] effectSound = new float[10];
+        private float[] effectSound = new float[30];
 
         [HideInInspector] public float bgmVolume = .2f;
         [HideInInspector] public bool soundOnOff = true;
@@ -38,7 +38,7 @@ namespace Enut4LJR
 
             for (int i = 0; i < effectSoundCount; i++)
             {
-                //최대 5개까지 재생되게 제어하여 랙 방지
+                //안드로이드의 경우 최대 5개까지 재생되게 제어하여 랙 방지
                 var soundObj = new GameObject();
                 soundObj.transform.SetParent(transform);
                 soundObj.transform.localPosition = Vector3.zero;
@@ -158,6 +158,25 @@ namespace Enut4LJR
             }
 
             return -1;
+        }
+
+        public void StopFileSound(string fileName)
+        {
+            if (!soundOnOff) return;
+
+            for (int i = 0; i < soundSourceList.Count; i++)
+            {
+                AudioSource src = soundSourceList[i];
+
+                if (!src.isPlaying) continue;
+                if (src.clip == null) continue;
+
+                if (src.clip.name == fileName)
+                {
+                    src.Stop();
+                    src.loop = false;
+                }
+            }
         }
 
         public void StopSoundIdx(int idx)

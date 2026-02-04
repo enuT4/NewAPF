@@ -36,7 +36,7 @@ public class TimerText : MemoryPoolObject
         if (GlobalValue.g_GameKind == GameKind.YSMS)
             moveVelocity = 250.0f;
         else if (GlobalValue.g_GameKind == GameKind.SDJR)
-            moveVelocity = 5.0f;
+            moveVelocity = 1.0f;
 
         SortLayerCanvas = GetComponent<Canvas>();
         SortLayerCanvas.overrideSorting = true;

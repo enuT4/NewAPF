@@ -1,15 +1,8 @@
 using Enut4LJR;
-using JetBrains.Annotations;
 using PlayFab;
 using PlayFab.ClientModels;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Net;
-using Unity.VisualScripting;
-//using UnityEditor.Build.Content;
 using UnityEngine;
-using UnityEngine.Analytics;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -74,16 +67,14 @@ public class ReadySceneMgr : MonoBehaviour
 
     [Header("-------- Rice Count --------")]
     [SerializeField] internal Text gameStartRiceTxt;
-    DateTime checkTime;
-    int[] fillArr = new int[5];
-    [SerializeField] int currTimeSec = 0;
-    int currYMD = 0;
-    int tempYMD = 0;
-    int timerSec = 0;
-    int timerMin = 0;
     int riceFillTimeSec = 300;
-    bool isRiceTimerStart = false;
-    bool isDayChange = false;
+    int zeroRiceTimer = 0;
+    float tempRiceTimer = 0.0f;
+    int tempRiceCount = 0;
+    long timeSinceRiceFillTime = 0;
+    long presentServerTime = 0;
+    long filledRiceCount = 0;
+    float remainRiceTime = 0.0f;
 
     public static ReadySceneMgr inst;
 
@@ -167,9 +158,12 @@ public class ReadySceneMgr : MonoBehaviour
     // Start is called before the first frame update
     void StartFunc()
     {
-        CalculateTimeFunc();
+        if (!MusicManager.instance.IsMusicPlaying())
+            MusicManager.instance.PlayMusic("MainBGM");
+
         CheckGameName();
         UpgradeUpdate();
+        UpdateRiceFunc();
 
         for (int ii = 0; ii < isItemChecked.Length; ii++)
         {
@@ -221,14 +215,11 @@ public class ReadySceneMgr : MonoBehaviour
             gameStartBtn.onClick.AddListener(CheckGameStart);
 
         userNickTxt.text = GlobalValue.g_Nickname;
-
-        if (GlobalValue.g_IsRiceTimerStart == 1) isRiceTimerStart = true;
-
         goldVal = GlobalValue.g_UserGold;
         gemVal = GlobalValue.g_UserGem;
-        tempYMD = GlobalValue.g_RiceCheckDate;
 
         GetMyRanking(GlobalValue.g_GameKind);
+
 
         if (riceBtn != null)
             riceBtn.onClick.AddListener(() =>
@@ -244,22 +235,6 @@ public class ReadySceneMgr : MonoBehaviour
     // Update is called once per frame
     void UpdateFunc()
     {
-        //if (Input.GetKeyDown(KeyCode.G))
-        //{
-        //    GlobalValue.g_RiceCount++;
-        //    gameStartRiceTxt.text = GlobalValue.g_RiceCount.ToString();
-        //}
-        //
-        //if (Input.GetKeyDown(KeyCode.H))
-        //{
-        //    GlobalValue.g_UserGold += 100;
-        //    userGoldTxt.text = GlobalValue.g_UserGold.ToString();
-        //}
-        //
-        //if (Input.GetKeyDown(KeyCode.J))
-        //{
-        //    Debug.Log(upgradeCanvasObj.transform.Find("Item1Btn").transform.GetChild(2));
-        //}
 
         if (bgmFadeOutTimer > 0.0f)
         {
@@ -273,6 +248,42 @@ public class ReadySceneMgr : MonoBehaviour
                 SceneManager.LoadScene(gameName + "InGameScene");
             }
         }
+
+        if (tempRiceTimer > 0.0f)
+        {
+            tempRiceTimer -= Time.deltaTime;
+            if (tempRiceTimer < 0.0f)
+            {
+                tempRiceTimer = 0.0f;
+                UpdateRiceFunc();
+            }
+
+            if (zeroRiceTimer != (int)tempRiceTimer)
+            {
+                zeroRiceTimer = (int)tempRiceTimer;
+                UpdateRiceTextFunc();
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            UpdateRiceFunc();
+        }
+
+
+        //if (Input.GetKeyDown(KeyCode.G))
+        //{
+        //    if (GlobalValue.g_Nickname == "운영자")
+        //    {
+        //        GlobalValue.g_YSMSBestScore = 0;
+        //        GlobalValue.g_YSMSRegionScore = 0;
+        //        GlobalValue.g_MyYSMSRank = -1;
+        //        GlobalValue.g_SDJRBestScore = 0;
+        //        GlobalValue.g_SDJRRegionScore = 0;
+        //        GlobalValue.g_MySDJRRank = -1;
+        //    }
+        //}
+
     }
 
     void UpBtnFunc(UpgradeKind ugKind)
@@ -280,18 +291,6 @@ public class ReadySceneMgr : MonoBehaviour
         SoundManager.instance.PlayerSound("Button");
         ugPanel.ugKind = ugKind;
         upgradePanelObj.SetActive(true);
-    }
-
-    void CheckRiceCount()
-    {
-        for (int ii = 0; ii < 5; ii++)
-            fillArr[ii] = 0;
-
-        if (GlobalValue.g_RiceCount < 5)
-        {
-            for (int ii = 0; ii < 5; ii++)
-                fillArr[ii] = GlobalValue.g_RiceCheckTime + riceFillTimeSec * (ii + 1);
-        }
     }
 
     void CheckGameName()
@@ -494,19 +493,11 @@ public class ReadySceneMgr : MonoBehaviour
             GlobalValue.g_RiceCount--;
 
             if (GlobalValue.g_RiceCount == 4)
-            {
-                checkTime = DateTime.Now;
-                GlobalValue.g_RiceCheckTime = CalculateDatetoSec(checkTime);
-                GlobalValue.g_RiceCheckDate = CalculateYMDtoNum(checkTime);
-                GlobalValue.g_IsRiceTimerStart = 1;
-                isRiceTimerStart = true;
-                CheckRiceCount();
-                Debug.Log(GlobalValue.g_RiceCheckDate + " : " + GlobalValue.g_RiceCheckTime);
-            }
+                GlobalValue.g_RiceFillTime = GetServerTime() + riceFillTimeSec;
 
             NetworkMgr.inst.PushPacket(PacketType.UserRice);
-
             gameStartRiceTxt.text = GlobalValue.g_RiceCount.ToString();
+
             GlobalValue.g_UserGem = gemVal;
             GlobalValue.g_UserGold = goldVal;
 
@@ -526,72 +517,61 @@ public class ReadySceneMgr : MonoBehaviour
 
     }
 
-    int CalculateYMDtoNum(DateTime date, int tempYMD = 0)
+
+    long GetServerTime()
     {
-        int tempNum = (date.Year % 100) * 10000 + date.Month * 100 + date.Day;
-        if (tempYMD != tempNum && tempYMD != 0)
-            isDayChange = true;
-        return tempNum;
+        return DateTimeOffset.UtcNow.ToUnixTimeSeconds() + GlobalValue.g_ServerTimeOffSet;
     }
 
-    int CalculateDatetoSec(DateTime date)
+    void UpdateRiceFunc()
     {
-        int tempSec = date.Hour * 3600 + date.Minute * 60 + date.Second;
-        if (isDayChange)
-        {
-            tempSec += (CalculateYMDtoNum(date) - GlobalValue.g_RiceCheckDate) * 86400;
-            isDayChange = false;
-        }
-
-        return tempSec;
+        UpdateRiceCountFunc();
+        UpdateRiceTextFunc();
     }
 
-    void CalculateTimeFunc()
+    void UpdateRiceCountFunc()
     {
-        if (!isRiceTimerStart)
-        {
-            gameStartRiceTxt.text = GlobalValue.g_RiceCount.ToString();
+        if (GlobalValue.g_RiceCount >= 5)
+        {   //만약 밥이 이미 5개 이상이면 업데이트 필요 없음
+            tempRiceTimer = 0;
             return;
         }
 
-        currYMD = CalculateYMDtoNum(DateTime.Now, tempYMD);
-        currTimeSec = CalculateDatetoSec(DateTime.Now);
+        presentServerTime = GetServerTime();
 
-        if (fillArr[0] <= currTimeSec)
+        if (presentServerTime < GlobalValue.g_RiceFillTime)
+        {   //아직 밥이 차지 않았다면 남은 시간만 업데이트함
+            remainRiceTime = GlobalValue.g_RiceFillTime - presentServerTime;
+            tempRiceTimer = remainRiceTime;
+        }
+        else
         {
-            for (int ii = 0; ii < 4; ii++)
-            {
-                if (fillArr[ii] <= currTimeSec && currTimeSec < fillArr[ii + 1])
-                {
-                    GlobalValue.g_RiceCount += ii + 1;
-                    GlobalValue.g_RiceCheckTime = fillArr[ii];
-                }
-            }
-            if (fillArr[4] <= currTimeSec)
-                GlobalValue.g_RiceCount += 5;
-
+            timeSinceRiceFillTime = presentServerTime - GlobalValue.g_RiceFillTime;
+            filledRiceCount = timeSinceRiceFillTime / riceFillTimeSec + 1;      // +1 : RiceFillTime이 지났다면 기본적으로 한개는 찼다는 뜻
+            GlobalValue.g_RiceCount += filledRiceCount;
             if (GlobalValue.g_RiceCount >= 5)
             {
                 GlobalValue.g_RiceCount = 5;
-                GlobalValue.g_IsRiceTimerStart = 0;
-                GlobalValue.g_RiceCheckTime = -1;
-                GlobalValue.g_RiceCheckDate = 0;
-                isRiceTimerStart = false;
+                tempRiceTimer = 0;      //변수 초기화
+                remainRiceTime = 0;
             }
-            CheckRiceCount();
-            NetworkMgr.inst.PushPacket(PacketType.UserRice);
+            else
+            {   //밥이 다 안찼다면 찬 만큼 다음 밥이 차는 시간도 뒤로 정해짐
+                GlobalValue.g_RiceFillTime += filledRiceCount * riceFillTimeSec;
+                remainRiceTime = GlobalValue.g_RiceFillTime - presentServerTime;        //뒤로 미뤄진 시간을 기준으로 다시 계산
+                tempRiceTimer = remainRiceTime;
+            }
         }
+    }
 
+    void UpdateRiceTextFunc()
+    {
         if (GlobalValue.g_RiceCount == 0)
-        {
-            timerMin = (fillArr[0] - currTimeSec) / 60;
-            timerSec = (fillArr[0] - currTimeSec) % 60;
-            gameStartRiceTxt.text = timerMin.ToString() + ":" + timerSec.ToString("D2");
-        }
+            gameStartRiceTxt.text = ((int)remainRiceTime / 60).ToString() + ":" + ((int)remainRiceTime % 60).ToString("D2");
         else
             gameStartRiceTxt.text = GlobalValue.g_RiceCount.ToString();
-
-        tempYMD = currYMD;
+        Debug.Log((zeroRiceTimer / 60).ToString() + ":" + (zeroRiceTimer % 60).ToString("D2"));
+        //Debug.Log(filledRiceCount.ToString() + ":" + timeSinceRiceFillTime.ToString() + ":" + remainRiceTime.ToString() + ":" + ((int)remainRiceTime / 60).ToString() + ":" + ((int)remainRiceTime % 60).ToString());
     }
 
 }

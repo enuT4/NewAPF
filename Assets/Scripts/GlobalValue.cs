@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -14,6 +15,8 @@ public enum GameKind
 public class GlobalValue : MonoBehaviour
 {
     public static bool g_isFirstLogin = false;
+    public static long g_RiceFillTime;
+    public static long g_ServerTimeOffSet;
     public static string g_UniqueID;
     public static string g_Nickname;
 
@@ -21,10 +24,7 @@ public class GlobalValue : MonoBehaviour
     public static int g_UserGem;
     public static int g_ExpPercent = 0;
 
-    public static int g_RiceCount = 5;
-    public static int g_IsRiceTimerStart;
-    public static int g_RiceCheckTime;
-    public static int g_RiceCheckDate;
+    public static long g_RiceCount = 5;
 
     public static int g_GMGOLD = 0;
     public static int g_GMGEM = 0;
@@ -41,17 +41,17 @@ public class GlobalValue : MonoBehaviour
 
     public static int[] g_YSMSUpgradeLv = new int[3] { 0, 0, 0 };
     public static int g_YSMSBestScore = 0;
-    public static int g_MyYSMSRank = 0;
+    public static int g_MyYSMSRank = -1;
     public static int g_YSMSRegionScore = 0;
-    public static int g_YSMSRegionRank = 1;
+    public static int g_YSMSRegionRank = -1;
     public static int g_YSMSTutSkipYN = 0;
     public static int g_YSMSTempScore = 0;
 
     public static int[] g_SDJRUpgradeLv = new int[3] { 0, 0, 0 };
     public static int g_SDJRBestScore = 0;
-    public static int g_MySDJRRank = 0;
+    public static int g_MySDJRRank = -1;
     public static int g_SDJRRegionScore = 0;
-    public static int g_SDJRRegionRank = 1;
+    public static int g_SDJRRegionRank = -1;
     public static int g_SDJRTutSkipYN = 0;
 
     public static int g_TotalScore = 0;

@@ -38,6 +38,9 @@ public class LobbyMgr : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (!MusicManager.instance.IsMusicPlaying())
+            MusicManager.instance.PlayMusic("MainBGM");
+
         CheckGM();
         totalScoreTxt.text = GlobalValue.g_TotalScore.ToString("N0");
         YSMSBestScoreTxt.text = GlobalValue.g_YSMSBestScore.ToString("N0");
@@ -59,8 +62,10 @@ public class LobbyMgr : MonoBehaviour
             SDJRGameBtn.onClick.AddListener(() => { SetGameKind(GameKind.SDJR); });
     }
 
+    //void Update() => UpdateFunc();
+
     // Update is called once per frame
-    void Update()
+    void UpdateFunc()
     {
         
     }

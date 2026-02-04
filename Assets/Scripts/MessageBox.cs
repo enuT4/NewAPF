@@ -71,17 +71,18 @@ public class MessageBox : MonoBehaviour
 
     public void SetMessageText(string label, string text, MessageState messState = MessageState.OK)
     {
-        if (messState == MessageState.OK)
+        switch (messState)
         {
-            messageOKBtn.gameObject.SetActive(true);
-            messageYesBtn.gameObject.SetActive(false);
-            messageNoBtn.gameObject.SetActive(false);
-        }
-        else if(messState == MessageState.YesNo)
-        {
-            messageOKBtn.gameObject.SetActive(false);
-            messageYesBtn.gameObject.SetActive(true);
-            messageNoBtn.gameObject.SetActive(true);
+            case MessageState.OK:
+                messageOKBtn.gameObject.SetActive(true);
+                messageYesBtn.gameObject.SetActive(false);
+                messageNoBtn.gameObject.SetActive(false);
+                break;
+            case MessageState.YesNo:
+                messageOKBtn.gameObject.SetActive(false);
+                messageYesBtn.gameObject.SetActive(true);
+                messageNoBtn.gameObject.SetActive(true);
+                break;
         }
         messageLabel.text = "¡Ú " + label + " ¡Ú";
         messageText.text = text;
@@ -91,45 +92,21 @@ public class MessageBox : MonoBehaviour
     {
         SoundManager.instance.PlayerSound("Button");
         Time.timeScale = 1.0f;
-        if (GlobalValue.g_MessYesNoKind == MessageYesNoKind.LobbyLogout)
-        {
-            GlobalValue.g_UniqueID = "";
-            GlobalValue.g_Nickname = "";
-            GlobalValue.g_UserGold = 0;
-            GlobalValue.g_UserGem = 0;
-            GlobalValue.g_ExpPercent = 0;
-            GlobalValue.g_RiceCount = 0;
-            GlobalValue.g_IsRiceTimerStart = 0;
-            GlobalValue.g_RiceCheckTime = 0;
-            GlobalValue.g_RiceCheckDate = 0;
-            GlobalValue.g_YSMSBestScore = 0;
-            GlobalValue.g_SDJRBestScore = 0;
-            GlobalValue.g_TotalScore = 0;
-            for (int ii = 0; ii < 3; ii++)
-            {
-                GlobalValue.g_YSMSUpgradeLv[ii] = 0;
-                GlobalValue.g_SDJRUpgradeLv[ii] = 0;
-            }
-            GlobalValue.g_YSMSTutSkipYN = 0;
-            GlobalValue.g_SDJRTutSkipYN = 0;
-            GlobalValue.g_GMGOLD = 0;
-            GlobalValue.g_GMGEM = 0;
-            GlobalValue.g_GMRICE = 0;
-            GlobalValue.g_MessYesNoKind = MessageYesNoKind.YesNoKindCount;
-            SceneManager.LoadScene("TitleScene");
-        }
-        else if (GlobalValue.g_MessYesNoKind == MessageYesNoKind.GotoReady)
-        {
-            if (GlobalValue.g_GameKind == GameKind.YSMS)
-            {
-                YSMSIngameMgr.spawnList.Clear();
-            }
-            else if (GlobalValue.g_GameKind == GameKind.SDJR)
-            {
 
-            }
-
-            SceneManager.LoadScene("ReadyScene");
+        switch (GlobalValue.g_MessYesNoKind)
+        {
+            case MessageYesNoKind.LobbyLogout:
+                GlobalDataResetFunc();
+                SceneManager.LoadScene("TitleScene");
+                break;
+            case MessageYesNoKind.GotoReady:
+                FinishGameFunc();
+                SceneManager.LoadScene("ReadyScene");
+                break;
+            case MessageYesNoKind.GotoLobby:
+                FinishGameFunc();
+                SceneManager.LoadScene("LobbyScene");
+                break;
         }
         gameObject.SetActive(false);
     }
@@ -138,5 +115,38 @@ public class MessageBox : MonoBehaviour
     {
         SoundManager.instance.PlayerSound("Button");
         gameObject.SetActive(false);
+    }
+
+    void GlobalDataResetFunc()
+    {
+        GlobalValue.g_UniqueID = "";
+        GlobalValue.g_Nickname = "";
+        GlobalValue.g_UserGold = 0;
+        GlobalValue.g_UserGem = 0;
+        GlobalValue.g_ExpPercent = 0;
+        GlobalValue.g_RiceCount = 0;
+        GlobalValue.g_RiceFillTime = 0;
+        GlobalValue.g_YSMSBestScore = 0;
+        GlobalValue.g_SDJRBestScore = 0;
+        GlobalValue.g_TotalScore = 0;
+        for (int ii = 0; ii < 3; ii++)
+        {
+            GlobalValue.g_YSMSUpgradeLv[ii] = 0;
+            GlobalValue.g_SDJRUpgradeLv[ii] = 0;
+        }
+        GlobalValue.g_YSMSTutSkipYN = 0;
+        GlobalValue.g_SDJRTutSkipYN = 0;
+        GlobalValue.g_GMGOLD = 0;
+        GlobalValue.g_GMGEM = 0;
+        GlobalValue.g_GMRICE = 0;
+        GlobalValue.g_MessYesNoKind = MessageYesNoKind.YesNoKindCount;
+    }
+
+    void FinishGameFunc()
+    {
+        if (GlobalValue.g_GameKind == GameKind.YSMS)
+            YSMSIngameMgr.spawnList.Clear();
+
+        MusicManager.instance.StopMusic();
     }
 }

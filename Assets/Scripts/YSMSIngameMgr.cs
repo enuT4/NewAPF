@@ -27,7 +27,7 @@ public class YSMSIngameMgr : MonoBehaviour
     [SerializeField] internal GameObject pausePanelObj;
     ComboText tempComboText;
 
-    float gameTime = 10.0f;
+    float gameTime = 20.0f;                         //수정수정
     float maxTime = 60.0f;
     [HideInInspector] public int currentScore = 0;
     float scoreRate = 0.0f;
@@ -50,7 +50,7 @@ public class YSMSIngameMgr : MonoBehaviour
     int leftorrightIndex = 0;
     int randomCharIndex = 0;
 
-    [SerializeField] internal Image timeupImg;
+    //[SerializeField] internal Image timeupImg;
     [SerializeField] internal Image plus10SecImg;
 
     [Header("-------- Combo Text --------")]
@@ -100,7 +100,7 @@ public class YSMSIngameMgr : MonoBehaviour
 
     //[Header("-------- GameOver --------")]
     //게임 오버
-    GameObject gameoverPanelObj;
+    [SerializeField] GameObject gameoverPanelObj;
     int showTime = 0;
     [SerializeField] bool[] isTimeShowArray = new bool[5];
     GameObject tempTimerObj = null;
@@ -138,7 +138,7 @@ public class YSMSIngameMgr : MonoBehaviour
         if (!rightBtn) rightBtn = bgImg.transform.Find("RightBtn").GetComponent<Button>();
 
         if (!pauseBtn) pauseBtn = bgImg.transform.Find("PauseBtn").GetComponent<Button>();
-        if (!pausePanelObj) pausePanelObj = GameObject.Find("Canvas").transform.Find("PausePanel").gameObject;
+        if (!pausePanelObj) pausePanelObj = GameObject.Find("Canvas").transform.Find("PausePanelCanvas").gameObject;
         if (!readyPanelObj) readyPanelObj = GameObject.Find("Canvas").transform.Find("ReadyPanel").gameObject;
         if (!gameoverPanelObj) gameoverPanelObj = GameObject.Find("Canvas").transform.Find("GameOverPanel").gameObject;
 
@@ -146,15 +146,9 @@ public class YSMSIngameMgr : MonoBehaviour
         if (!timebarImg) timebarImg = timerBarObj.transform.GetChild(0).GetComponent<Image>();
         if (!timerText) timerText = timerBarObj.transform.GetChild(1).GetComponent<Text>();
         if (!scoreText) scoreText = bgImg.transform.Find("ScoreText").GetComponent<Text>();
-        if (!timeupImg) timeupImg = bgImg.transform.Find("TimeUpImg").GetComponent<Image>();
+        //if (!timeupImg) timeupImg = bgImg.transform.Find("TimeUpImg").GetComponent<Image>();
         //if (!tempposObj) tempposObj = charSpawnTr.GetChild(0).gameObject;
 
-        //수정수정수정수정수정
-        if (GlobalValue.g_GameKind != GameKind.YSMS)
-        {
-            Debug.Log("YSMS로 gamekind 변경");
-            GlobalValue.g_GameKind = GameKind.YSMS;
-        }
     }
 
     // Start is called before the first frame update
@@ -197,8 +191,8 @@ public class YSMSIngameMgr : MonoBehaviour
         if (readyPanelObj != null && !readyPanelObj.activeSelf)
             readyPanelObj.SetActive(true);
 
-        if (timeupImg != null && timeupImg.gameObject.activeSelf)
-            timeupImg.gameObject.SetActive(false);
+        //if (timeupImg != null && timeupImg.gameObject.activeSelf)
+        //    timeupImg.gameObject.SetActive(false);
 
         if (plus10SecImg != null && plus10SecImg.gameObject.activeSelf)
             plus10SecImg.gameObject.SetActive(false);
@@ -232,9 +226,8 @@ public class YSMSIngameMgr : MonoBehaviour
         for (int ii = 0; ii < isTimeShowArray.Length; ii++)
             isTimeShowArray[ii] = true;
 
-
         if (pauseBtn != null)
-            pauseBtn.onClick.AddListener(() => PauseBtnFunc(true));
+            pauseBtn.onClick.AddListener(() => { PauseBtnFunc(true); });
     }
 
     void Update() => UpdateFunc();
@@ -263,11 +256,9 @@ public class YSMSIngameMgr : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.RightArrow))
                 RightBtnFunc();
 
-        }
-        else
-        {
-            gameoverPanelObj.SetActive(true);
-            gameoverPanelObj.GetComponent<GameOverPanel>().TimeUpOrGameOver(true);
+            if (Input.GetKeyDown(KeyCode.Escape))
+                PauseBtnFunc(!pausePanelObj.gameObject.activeSelf);
+
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -290,6 +281,11 @@ public class YSMSIngameMgr : MonoBehaviour
         //    //Debug.Log(spawnList[8].transform.position.y);
         //    Debug.Log(spawnList.Count + " : " + posArray.Length);
         //}
+        
+        //if (Input.GetMouseButtonDown(0))
+        //    Debug.Log("sdjfklj");
+
+
 
     }
 
@@ -526,8 +522,8 @@ public class YSMSIngameMgr : MonoBehaviour
         guagebarImg.fillAmount = currentGuage / maxGuage;
         SetLayerFunc();
         UpdateLevelFunc();
-        //SoundManager.instance.PlayerSound("Whip", 0.4f);
-        SoundManager.instance.PlayGUISound("Whip", 0.4f);
+        SoundManager.instance.PlayerSound("Whip", 0.3f);
+        //SoundManager.instance.PlayGUISound("Whip", 0.4f);
     }
     void ClassifyIncorrectFunc()
 	{
@@ -538,7 +534,7 @@ public class YSMSIngameMgr : MonoBehaviour
         firstCharNode.isMove = false;
         falseTimer = setFalseTime;
         firstCharNode.ErrorColorChangeFunc(true);
-        SoundManager.instance.PlayerSound("Fail", 0.7f);
+        SoundManager.instance.PlayerSound("Fail", 0.6f);
     }
 
     void FalseTimerFunc()
@@ -783,7 +779,7 @@ public class YSMSIngameMgr : MonoBehaviour
 
     public void PauseBtnFunc(bool isPause)
     {
-        SoundManager.instance.PlayerSound("Button");
+        //SoundManager.instance.PlayerSound("Button");
         if (pausePanelObj != null)
             pausePanelObj.SetActive(isPause);
 
@@ -809,6 +805,7 @@ public class YSMSIngameMgr : MonoBehaviour
 			}
             Time.timeScale = 0.0f;
             SoundManager.instance.PauseAllSound();
+            SoundManager.instance.PlayerSound("Button");
         }
         else
 		{
@@ -840,7 +837,13 @@ public class YSMSIngameMgr : MonoBehaviour
         showTime = (int)gameTime;
         if (1 <= showTime && showTime <= 5)
         {
+            if (!isTimeShowArray[showTime - 1]) return;
             CountTimeFunc(showTime, isTimeShowArray[showTime - 1]);
+            Debug.Log(showTime);
+            if (showTime % 2 == 1)
+                SoundManager.instance.PlayerSound("FiveSecTick");
+            else
+                SoundManager.instance.PlayerSound("FiveSecTock");
             isTimeShowArray[showTime - 1] = false;
         }
         else if (showTime == 0)
@@ -851,8 +854,13 @@ public class YSMSIngameMgr : MonoBehaviour
                 spawnList.Clear();
                 for (int ii = 0; ii < isTimeShowArray.Length; ii++)
                     isTimeShowArray[ii] = false;
-                if (timeupImg != null)
-                    timeupImg.gameObject.SetActive(true);
+                if (gameoverPanelObj != null)
+                {
+                    gameoverPanelObj.SetActive(true);
+                    gameoverPanelObj.GetComponent<GameOverPanel>().TimeUpOrGameOver(true);
+                }
+                //if (timeupImg != null)
+                //    timeupImg.gameObject.SetActive(true);
                 MusicManager.instance.StopMusic();
                 SoundManager.instance.PlayerSound("TimeUp", 1.3f);
                 isGameOver = true;
@@ -878,6 +886,7 @@ public class YSMSIngameMgr : MonoBehaviour
         if (tempTimerObj != null)
             tempTimerObj.GetComponent<TimerText>().InitTimeFunc(showTime);
         tempTimerObj.transform.localPosition = Vector3.zero;
+        tempTimerObj.transform.localScale = Vector3.one;
 
     }
 

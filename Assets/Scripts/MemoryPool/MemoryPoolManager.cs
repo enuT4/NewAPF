@@ -58,7 +58,8 @@ public class MemoryPoolManager : MonoBehaviour
                 for (int j = 0; j < poolingList[i].itemNumber; j++)
                 {
                     GameObject pool = Instantiate(poolingList[i].poolObject);
-                    pool.transform.parent = poolingList[i].poolTr.transform;
+                    pool.transform.SetParent(poolingList[i].poolTr.transform);
+                    //pool.transform.parent = poolingList[i].poolTr.transform;
                     pool.gameObject.SetActive(false);
                     if (pool.TryGetComponent(out MemoryPoolObject ob))
                     {

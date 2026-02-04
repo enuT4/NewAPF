@@ -223,20 +223,10 @@ public class LoginPanel : MonoBehaviour
                     if (int.TryParse(eachData.Value.Value, out tempValue))
                         GlobalValue.g_RiceCount = tempValue;
                 }
-                else if (eachData.Key == "IsRiceTimer")
+                else if (eachData.Key == "RiceFillTime")
                 {
                     if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_IsRiceTimerStart = tempValue;
-                }
-                else if (eachData.Key == "RiceCheckTime")
-                {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_RiceCheckTime = tempValue;
-                }
-                else if (eachData.Key == "RiceCheckDate")
-                {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_RiceCheckDate = tempValue;
+                        GlobalValue.g_RiceFillTime = tempValue;
                 }
                 else if (eachData.Key == "YSMSBonusUGLv")
                 {
@@ -284,6 +274,7 @@ public class LoginPanel : MonoBehaviour
         GlobalValue.g_GMGOLD = 10000000;
         GlobalValue.g_GMGEM = 10000;
         GlobalValue.g_GMRICE = 100;
+        GetOffsetTimeFunc();
         SceneManager.LoadScene("LobbyScene");
 
     }
@@ -307,6 +298,20 @@ public class LoginPanel : MonoBehaviour
         msgBoxObj.SetActive(true);
         msgBox.SetMessageText("로그인 오류", errorStr);
     }
+
+    void GetOffsetTimeFunc()
+    {
+        PlayFabClientAPI.GetTime(new GetTimeRequest(),
+            result =>
+            {
+                GlobalValue.g_ServerTimeOffSet = 
+                DateTimeOffset.Parse(result.Time.ToString()).ToUnixTimeSeconds() - DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            },
+            error => { }
+            );
+    }
+
+    
 
     void CreateIDFunc()         //아이디 생성 함수
     {

@@ -29,7 +29,7 @@ namespace Enut4LJR
             }
         }
 
-        internal void PlayMusic(string fileName)
+        internal void PlayMusic(string fileName, float bgmVolume = 1.0f)
         {
             AudioClip clip = AudioClipCheck(fileName);
 
@@ -45,11 +45,16 @@ namespace Enut4LJR
 
             audioSource.Stop();
             audioSource.clip = clip;
-            //audioSource.volume = volume * bgmVolume;
+            audioSource.volume = volume * bgmVolume;
             //bgmVolume = volume;
-            audioSource.volume = volume;
+            //audioSource.volume = volume;
             if (!audioSource.loop) audioSource.loop = true;
             audioSource.Play();
+        }
+
+        internal bool IsMusicPlaying()
+        {
+            return audioSource && audioSource.isPlaying;
         }
 
         internal void SetVolume(float volume)

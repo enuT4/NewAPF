@@ -84,15 +84,16 @@ public class ReadyPanel : MonoBehaviour
 
     void ClassifyGameKindFunc()
     {
+        //GlobalValue.g_GameKind = GameKind.SDJR;                     //수정수정
         if (GlobalValue.g_GameKind == GameKind.YSMS)
         {
             YSMSIngameMgr.inst.GameStartAfterReadyFunc();
-            MusicManager.instance.PlayMusic("YSMSIngameBGM");
+            MusicManager.instance.PlayMusic("YSMSIngameBGM", 0.5f);
         }
         else if (GlobalValue.g_GameKind == GameKind.SDJR)
         {
-            
-            //MusicManager.instance.PlayMusic("SDJRIngameBGM");        //수정수정수정수정
+            SDJRIngameMgr.inst.GameStartAfterReadyFunc();
+            MusicManager.instance.PlayMusic("SDJRIngameBGM");
         }
     }
 }

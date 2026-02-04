@@ -117,9 +117,7 @@ public class NetworkMgr : MonoBehaviour
             Data = new Dictionary<string, string>()
             {
                 {"UserRice", GlobalValue.g_RiceCount.ToString() },
-                {"IsRiceTimer", GlobalValue.g_IsRiceTimerStart.ToString() },
-                {"RiceCheckTime", GlobalValue.g_RiceCheckTime.ToString() },
-                {"RiceCheckDate", GlobalValue.g_RiceCheckDate.ToString() },
+                {"RiceFillTime", GlobalValue.g_RiceFillTime.ToString() },
             }
         };
         isNetworkLock = true;

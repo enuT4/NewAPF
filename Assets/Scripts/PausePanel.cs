@@ -48,6 +48,10 @@ public class PausePanel : MonoBehaviour
                 //게임 일시정지 풀렸을 때 콤보 및 시간 재개 함수
                 if (GlobalValue.g_GameKind == GameKind.YSMS)
                     YSMSIngameMgr.inst.PauseBtnFunc(false);
+                else if (GlobalValue.g_GameKind == GameKind.SDJR)
+                    SDJRIngameMgr.inst.PauseBtnFunc(false);
+                else
+                    Debug.Log("gamekind 설정 안됨");
 
             });
 

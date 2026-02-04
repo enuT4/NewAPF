@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,6 +14,7 @@ public class SDJRIngameMgr : MonoBehaviour
     internal Image guageBarImg;
     internal Text scoreText;
     internal Image timebarImg;
+    RectTransform timebarRectTransform;
     //Vector2 timebarPos;
     Vector3 timebarMaxPos;
     float timebarPosX;
@@ -26,12 +26,17 @@ public class SDJRIngameMgr : MonoBehaviour
 
 
     //시간 변수
-    float gameTime = 10000.0f;
+    float gameTime = 60.0f;       
+    //float gameTime = 10.0f;
     float maxTime = 65.0f;
     bool[] isTimeShowArray = new bool[5];
+    [SerializeField]int showTime;
     bool isTimeUp = false;
-    bool isGameStart = false;
+    [SerializeField]bool isGameStart = false;
     bool isGameOver = false;
+    int gameoverSoundInt = -1;
+    GameObject tempTimerObj = null;
+
 
     //쿨다운 변수
     [SerializeField] float bonusTileCooldown = 0.0f;
@@ -47,15 +52,17 @@ public class SDJRIngameMgr : MonoBehaviour
     [SerializeField] float autoLineSpawnCooldown = 0.0f;
     [HideInInspector] public bool switchBool = false;
 
-    //타이머 변수
+    //방해타일 변수
     public float badTile1EffectTimer = 0.0f;
     public float badTile2EffectTimer = 0.0f;
+    [SerializeField] internal Image badTile1EffectShowImg;
+
 
     //폭탄 변수
     float maxGuage = 100.0f;
     float currentGuage = 0.0f;
     float guageAmount = 0.0f;
-    int bombCount = 0;
+    public int bombCount = 0;                   //GameOverScene 접근용
     internal Image plus10SecImg;
     float plusShowTimer = 0.0f;
     int bombGuageCount = 0;
@@ -75,8 +82,7 @@ public class SDJRIngameMgr : MonoBehaviour
     List<GameObject>[] tileListArray = new List<GameObject>[3];     //타일 리스트
     List<int>[] tileIndexListArray = new List<int>[3];                //타일의 종류 정보를 담은 리스트
     List<int>[] deleteTileListArray = new List<int>[3];               //타일 제거 리스트
-    GameObject explosionEffectObj;                                  //타일 제거 효과(폭발)
-    GameObject effectGroupobj;
+    //GameObject explosionEffectObj;                                  //타일 제거 효과(폭발)
     [HideInInspector] public bool isReverse = false;
     [HideInInspector] public bool isTileHide = false;
     internal Image badTileShowImg;
@@ -87,6 +93,11 @@ public class SDJRIngameMgr : MonoBehaviour
     //타일 삭제 관련 
     TileType tempDeleteTileType;
     GameObject tempExplosionEffectObj;
+    ParticleSystem[] explosionParticleSystem;
+    public GameObject effectGroupobj;
+    //public GameObject expEffObj;
+    //float bonusDelayTime = 0.0f;
+    //bool isBonusDelay = false;
 
     KeyDirection selectedKeyDirection;
     GameObject tempTileSelectObj;
@@ -103,10 +114,11 @@ public class SDJRIngameMgr : MonoBehaviour
 
 
     //점수 변수
-    int currentScore = 0;
-    int gameLevel = 1;
+    public int currentScore = 0;                //GameOverScene 접근용
+    public int gameLevel = 1;                   //GameOverScene 접근용
     GameObject tempBonusTextObj;
     float bonusValue = 0;
+    RectTransform bonusRectTransform;
 
     //아이템 변수
     bool isEraserItemBought = false;
@@ -123,11 +135,13 @@ public class SDJRIngameMgr : MonoBehaviour
     float superRate = 0.0f;
 
     //슈퍼피버 변수
-    int fireCombo = 13;
+    [SerializeField]int fireCombo = 13;
     float superFeverTimer = 0.0f;
     bool isSuperFeverOn = false;
-    bool isSuperFeverLineSpawn = false;
+    //bool isSuperFeverLineSpawn = false;
     int tempLevel = 0;
+    GameObject comboCountEffectObj;
+    ComboCountEffectImage comboCountImage;
 
     //라인 스폰 변수
     GameObject tempLineSpawnTextObj;
@@ -158,16 +172,23 @@ public class SDJRIngameMgr : MonoBehaviour
     private Action rightKeyAction;
     private Action downKeyAction;
     private Coroutine reverseCoroutine;
+    private Coroutine coverTileCoroutine;
+    internal GameObject touchBtnGroupObj;
+    internal Button leftTouchBtn;
+    internal Button rightTouchBtn;
+    internal Button downTouchBtn;
 
 
     //[Header("-------- Pause Panel --------")]
-    internal Button pauseBtn;
+    [SerializeField] internal Button pauseBtn;
     internal GameObject pausePanelObj;
     internal GameObject readyPanelObj;
     internal GameObject gameoverPanelObj;
 
 
     public static SDJRIngameMgr inst;
+
+    int popSoundInt;
 
 
 
@@ -189,8 +210,17 @@ public class SDJRIngameMgr : MonoBehaviour
         if (!comboTextObj) comboTextObj = bgImgObj.transform.Find("ComboSpawnGroup").gameObject;
         if (!hammerTileSpawnPos) hammerTileSpawnPos = bgImgObj.transform.Find("HammerTileSpawnPos").transform;
         if (!hammerItemObj) hammerItemObj = hammerTileSpawnPos.transform.GetChild(0).gameObject;
+        if (!badTile1EffectShowImg) badTile1EffectShowImg = bgImgObj.transform.Find("BadTile1ShowImg").GetComponent<Image>();
+        if (!comboCountEffectObj) comboCountEffectObj = bgImgObj.transform.Find("ComboCountEffectObj").gameObject;
+        if (comboCountEffectObj != null) comboCountImage = comboCountEffectObj.GetComponent<ComboCountEffectImage>();
 
-        if (!pausePanelObj) pausePanelObj = GameObject.Find("Canvas").transform.Find("PausePanel").gameObject;
+        if (!pauseBtn) pauseBtn = bgImgObj.transform.Find("PauseBtn").GetComponent<Button>();
+        if (!touchBtnGroupObj) touchBtnGroupObj = bgImgObj.transform.Find("TouchBtnGroup").gameObject;
+        if (!leftTouchBtn) leftTouchBtn = touchBtnGroupObj.transform.GetChild(0).GetComponent<Button>();
+        if (!rightTouchBtn) rightTouchBtn = touchBtnGroupObj.transform.GetChild(1).GetComponent<Button>();
+        if (!downTouchBtn) downTouchBtn = touchBtnGroupObj.transform.GetChild(2).GetComponent<Button>();
+
+        if (!pausePanelObj) pausePanelObj = GameObject.Find("Canvas").transform.Find("PausePanelCanvas").gameObject;
         if (!readyPanelObj) readyPanelObj = GameObject.Find("Canvas").transform.Find("ReadyPanel").gameObject;
         if (!gameoverPanelObj) gameoverPanelObj = GameObject.Find("Canvas").transform.Find("GameOverPanel").gameObject;
 
@@ -226,55 +256,63 @@ public class SDJRIngameMgr : MonoBehaviour
         if (spawnLineBtn != null)
             spawnLineBtn.onClick.AddListener(() => { SpawnLineFunc(true); });
 
-        if (hammerItemObj.activeSelf) hammerItemObj.SetActive(false);
+        if (pauseBtn != null)
+            pauseBtn.onClick.AddListener(() => { PauseBtnFunc(true); });
+
+        if (leftTouchBtn != null)
+            leftTouchBtn.onClick.AddListener(() => { leftKeyAction?.Invoke(); });
+        if (rightTouchBtn != null)
+            rightTouchBtn.onClick.AddListener(() => { rightKeyAction?.Invoke(); });
+        if (downTouchBtn != null)
+            downTouchBtn.onClick.AddListener(() => { downKeyAction?.Invoke(); });
+
+         if (hammerItemObj.activeSelf) hammerItemObj.SetActive(false);
 
         guageAmount = 3.2f;
         currentGuage = 0.0f;
         guageBarImg.fillAmount = currentGuage / maxGuage;
         screenScale = 1440.0f / Screen.width;
-        isGameStart = true;
+        timebarRectTransform = timebarImg.GetComponent<RectTransform>();
+
+        
     }
 
     // Update is called once per frame 
     void Update()
     {
-        if (isGameStart)
+        if (isGameOver) return;
+        if (!isGameStart) return;
+
+        gameTime -= Time.deltaTime;
+        timerText.text = ((int)gameTime).ToString();
+
+        //if (Time.timeScale != 0.0f && (0.0f < gameTime && gameTime <= 60.0f))
+        //    timebarImg.transform.Translate(Vector3.left * Time.deltaTime * (1440.0f / 60.0f) / screenScale);
+        if (Time.timeScale != 0.0f && (0.0f < gameTime && gameTime <= 60.0f))
+            timebarRectTransform.anchoredPosition += Vector2.left * Time.deltaTime * (1440.0f / 60.0f) / screenScale;
+
+
+
+        CheckTimeStateFunc(gameTime);
+
+        if (0.0f < plusShowTimer)
         {
-            gameTime -= Time.deltaTime;
-            timerText.text = ((int)gameTime).ToString();
-            if (Time.timeScale != 0.0f && (0.0f < gameTime && gameTime <= 60.0f))
-                timebarImg.transform.Translate(Vector3.left * Time.deltaTime * (1440.0f / 60.0f) / screenScale);
-
-            CheckTimeStateFunc(gameTime);
-
-            if (0.0f < plusShowTimer)
+            if (!plus10SecImg.gameObject.activeSelf)
+                plus10SecImg.gameObject.SetActive(true);
+            plusShowTimer -= Time.deltaTime;
+            if (plusShowTimer < 0.0f)
             {
-                if (!plus10SecImg.gameObject.activeSelf)
-                    plus10SecImg.gameObject.SetActive(true);
-                plusShowTimer -= Time.deltaTime;
-                if (plusShowTimer < 0.0f)
-                {
-                    plusShowTimer = 0.0f;
-                    plus10SecImg.gameObject.SetActive(false);
-                }
+                plusShowTimer = 0.0f;
+                plus10SecImg.gameObject.SetActive(false);
             }
-
-            if (!isGameOver && 0.0f < lineSpawnDelayTime && 0.0f < gameTime)
-            {
-                lineSpawnDelayTime -= Time.deltaTime;
-                if (lineSpawnDelayTime < 0.0f)
-                    lineSpawnDelayTime = 0.0f;
-            }
-
         }
 
-        TileCooldownFunc();
-        LineSpawnTranslateFunc(tileGroupCurrentPos.y);
-        DurationTimeFunc();
-
-
-
-
+        if (!isGameOver && 0.0f < lineSpawnDelayTime && 0.0f < gameTime)
+        {
+            lineSpawnDelayTime -= Time.deltaTime;
+            if (lineSpawnDelayTime < 0.0f)
+                lineSpawnDelayTime = 0.0f;
+        }
 
         if (Input.GetKeyDown(KeyCode.Space))
             SpawnLineFunc(true);
@@ -284,16 +322,17 @@ public class SDJRIngameMgr : MonoBehaviour
             rightKeyAction?.Invoke();
         if (Input.GetKeyDown(KeyCode.DownArrow))
             downKeyAction?.Invoke();
+        if (Input.GetKeyDown(KeyCode.Escape))
+            PauseBtnFunc(!pausePanelObj.gameObject.activeSelf);
+
+        TileCooldownFunc();
+        LineSpawnTranslateFunc(tileGroupCurrentPos.y);
+        DurationTimeFunc();
 
 
-     
         if (Input.GetKeyDown(KeyCode.G))
-		{
-            for (int test = 2; test >= 0; test--)
-            {
-                string tempstring = string.Join("][", tileIndexListArray[test]);
-                Debug.Log("[" + tempstring + "]");
-            }
+        {
+            Debug.Log(GlobalValue.g_GameKind);
         }
 
     }
@@ -386,6 +425,7 @@ public class SDJRIngameMgr : MonoBehaviour
     void MakeTileNodeFunc(List<GameObject> tileList, List<int> tileIndexList)
     {
         tempTileObj = MemoryPoolManager.instance.GetObject("TileSpawnGroup");
+        tempTileObj.transform.localScale = Vector3.one;
         tempTileNode = tempTileObj.GetComponent<SDJRTileNode>();
         tempTileNode.tileType = ChooseTileType();
         tempTileNode.SetTileType(tempTileNode.tileType, gameLevel);
@@ -400,6 +440,13 @@ public class SDJRIngameMgr : MonoBehaviour
                 tempTileNode.tileIdx == dedupeTileNode1.tileIdx)
                 tempTileNode.SetTileType(tempTileNode.tileType, gameLevel, true, tempTileNode.tileIdx);
         }
+
+
+
+        if (isTileHide && !tempTileNode.blockedTileImg.activeSelf)
+            tempTileNode.blockedTileImg.SetActive(true);
+        else if(!isTileHide && tempTileNode.blockedTileImg.activeSelf)
+            tempTileNode.blockedTileImg.SetActive(false);
 
         //tempTileNode.SetTileIndexFunc(tempTileNode.tileIdx);      //수정수정 -> 굳이 이함수를 넣지 않아도 될 것 같은데?
         if (tempTileNode == null) Debug.Log("이거");
@@ -444,12 +491,11 @@ public class SDJRIngameMgr : MonoBehaviour
     void SpawnLineFunc(bool isManual)
     {   //라인 스폰 함수
         if (pausePanelObj.activeSelf) return;
-        if (0.0f < lineSpawnDelayTime) return;
+        //if (0.0f < lineSpawnDelayTime) return;
         if (isGameOver || isTimeUp) return;
 
 
-
-        if (isManual)
+        if (isManual)       //수동으로 라인을 생성했을 때
         {
             if (isFirstLineSpawn)
             {
@@ -457,9 +503,11 @@ public class SDJRIngameMgr : MonoBehaviour
                 isFirstLineSpawn = false;
             }
             currentScore += 200;
-
+            scoreText.text = currentScore.ToString("N0");
+            SoundManager.instance.PlayGUISound("Whip", 0.25f);
             //점수 연출
             tempLineSpawnTextObj = MemoryPoolManager.instance.GetObject("LineSpawnTextGroup");
+            tempLineSpawnTextObj.transform.localScale = Vector3.one;
             tempLineSpawnTextObj.transform.localPosition = lineSpawnTextPosition;
             //tempLineSpawnText = tempLineSpawnTextObj.GetComponent<LineSpawnText>();
             //tempLineSpawnText.InitLineSpawnTextFunc();
@@ -507,19 +555,81 @@ public class SDJRIngameMgr : MonoBehaviour
             localPosY = -135.0f * 5;
             isTileGroupMove = false;
 
-            // 게임오버 판정
-            //for (int ii = 0; ii < 3; ii++)
-            //{
-            //    if (tileListArray[ii].Count >= 12)
-            //        isGameOver = true;
-            //}
+            // 게임오버 판정                      
+            isGameOver = JudgeGameOver();
+            GameOverFunc();
         }
         tileGroupCurrentPos = new Vector2(0.0f, 675.0f + localPosY);
         tileGroupObj.transform.localPosition = tileGroupCurrentPos;
     }
 
+    bool JudgeGameOver()
+    {
+        for (int ii = 0; ii < 3; ii++)
+        {
+            if (tileListArray[ii].Count >= 14)
+                return true;
+        }
+        return false;
+    }
+
     void CheckTimeStateFunc(float gameTime)
     {
+        if (gameTime > 6.0f)
+        {
+            for (int ii = 0; ii < isTimeShowArray.Length; ii++)
+            {
+                if (isTimeShowArray[ii] == false)
+                    isTimeShowArray[ii] = true;
+            }
+            return;
+        }
+
+        showTime = (int)gameTime;
+
+        if (1 <= showTime && showTime <= 5)
+        {
+            if (isTimeShowArray[showTime - 1])
+            {
+                isTimeShowArray[showTime - 1] = false;
+                CountTimeFunc(showTime, isTimeShowArray[showTime - 1]);
+                if (showTime % 2 == 1)
+                    SoundManager.instance.PlayerSound("FiveSecTick");
+                else
+                    SoundManager.instance.PlayerSound("FiveSecTock");
+            }
+            
+            
+        }
+        else if (showTime == 0)
+        {
+            if (isGameOver) return;
+            gameTime = 0.0f;
+            for (int ii = 0; ii < isTimeShowArray.Length; ii++)
+                isTimeShowArray[ii] = false;
+            if (gameoverPanelObj != null)
+            {
+                gameoverPanelObj.SetActive(true);
+                gameoverPanelObj.GetComponent<GameOverPanel>().TimeUpOrGameOver(true);
+            }
+            //if (timeupImg != null)
+            //    timeupImg.gameObject.SetActive(true);
+            MusicManager.instance.StopMusic();
+            SoundManager.instance.PlayerSound("TimeUp", 1.3f);
+            isGameOver = true;
+        }
+    }
+
+    public void CountTimeFunc(int showTime, bool isTimeShow)
+    {
+        //if (!isTimeShow) return;
+        //if (!timerObj) return;
+        tempTimerObj = MemoryPoolManager.instance.GetObject("TimerTextSpawnGroup");
+        if (tempTimerObj != null)
+            tempTimerObj.GetComponent<TimerText>().InitTimeFunc(showTime);
+        tempTimerObj.transform.localPosition = Vector3.zero;
+        tempTimerObj.transform.localScale = Vector3.one;
+        tempTimerObj.SetActive(true);
 
     }
 
@@ -527,7 +637,7 @@ public class SDJRIngameMgr : MonoBehaviour
 
     void TileCooldownFunc()
     {
-        //SpawnLineCooldownFunc();              //수정수정수정
+        SpawnLineCooldownFunc();
         BonusTileCooldownFunc();
         EraserTileCooldownFunc();
         HammerTileCooldownFunc();
@@ -538,7 +648,7 @@ public class SDJRIngameMgr : MonoBehaviour
 
     void SpawnLineCooldownFunc()
     {//자동으로 타일이 내려오는 시간을 조절하는 타이머
-        if (isGameOver || gameTime <= 0.0f) return;
+        if (isGameOver || isTimeUp) return;
 
         if (0.0f < autoLineSpawnCooldown)
         {
@@ -568,7 +678,7 @@ public class SDJRIngameMgr : MonoBehaviour
 
     void EraserTileCooldownFunc()
     {//지우개 아이템 스폰 타이머
-        //if (!isEraserItemBought) return;                            //지우개 아이템을 사지 않았다면        //수정수정수정
+        if (!isEraserItemBought) return;                            //지우개 아이템을 사지 않았다면
         if (isSpawn[1]) return;                                 //지우개 아이템이 준비되지 않았다면
         if (0.0f < eraserTileCooldown)
         {
@@ -645,14 +755,13 @@ public class SDJRIngameMgr : MonoBehaviour
 
     void DurationTimeFunc()
     {
-        HammerTimerFunc();
-        BadTileEffectTimerFunc();
-        SuperFeverTimerFunc();
+        HammerTimerFunc();              //해머 아이템 지속시간 함수
+        SuperFeverTimerFunc();          //슈퍼피버 지속시간 함수
     }
 
     void HammerTimerFunc()
     {//해머 아이템 지속시간 타이머
-        if (!isHammerItemBought) return;                        //해머 아이템을 사지 않았다면 
+        if (!isHammerItemBought) return;                        //해머 아이템을 사지 않았다면
         if (!isHammerOn) return;                                //해머 아이템이 발동되지 않았다면
         if (0.0f < hammerDurationTime)
         {
@@ -675,29 +784,13 @@ public class SDJRIngameMgr : MonoBehaviour
         }
     }
 
-    void BadTileEffectTimerFunc()
+    void BadTile2ImageOnOff(bool isOn)
     {
-        //방해타일 1
-        if (0.0f < badTile1EffectTimer)
+        for (int ii = 0; ii < 3; ii++)
         {
-            badTile1EffectTimer -= Time.deltaTime;
-            if (badTile1EffectTimer < 0.0f)
-            {
-                badTile1EffectTimer = 0.0f;
-                isReverse = false;
-            }
-        }
-
-        //방해타일 2
-        if (0.0f < badTile2EffectTimer)
-        {
-            badTile2EffectTimer -= Time.deltaTime;
-            if (badTile2EffectTimer < 0.0f)
-            {
-                badTile2EffectTimer = 0.0f;
-                isTileHide = false;
-                switchBool = true;
-            }
+            foreach (GameObject tile in tileListArray[ii])
+                tile.GetComponent<SDJRTileNode>().blockedTileImg.SetActive(isOn);
+            isTileHide = isOn;
         }
     }
 
@@ -710,12 +803,12 @@ public class SDJRIngameMgr : MonoBehaviour
             {
                 superFeverTimer = 0.0f;
                 gameLevel = tempLevel;
+                isSuperFeverOn = false;
                 if (!isHammerOn)
                     fireCombo = comboCount + 41;
             }
         }
     }
-
 
     #endregion
 
@@ -726,11 +819,15 @@ public class SDJRIngameMgr : MonoBehaviour
         {
             leftKeyAction = () => ActionFunc(KeyDirection.Right);
             rightKeyAction = () => ActionFunc(KeyDirection.Left);
+            if (badTile1EffectShowImg != null && !badTile1EffectShowImg.gameObject.activeSelf)
+                badTile1EffectShowImg.gameObject.SetActive(true);
         }
         else
         {
             leftKeyAction = () => ActionFunc(KeyDirection.Left);
             rightKeyAction = () => ActionFunc(KeyDirection.Right);
+            if (badTile1EffectShowImg != null && badTile1EffectShowImg.gameObject.activeSelf)
+                badTile1EffectShowImg.gameObject.SetActive(false);
         }
         downKeyAction = () => ActionFunc(KeyDirection.Down);
     }
@@ -771,9 +868,11 @@ public class SDJRIngameMgr : MonoBehaviour
             tempTileSelectNode.SelectOrDeselectFunc(true);
             selectedTileObj = tempTileSelectObj;
             isOnlySelect = true;
+            SoundManager.instance.PlayerSound("Select");
         }
         else
         {
+            isOnlySelect = false;
             tempTileSelectNode = selectedTileObj.GetComponent<SDJRTileNode>();
             if (selectedKeyDirection != direction)      //처음 선택한 키와 다른 쪽 키를 선택 -> 그쪽으로 이동
             {
@@ -786,12 +885,16 @@ public class SDJRIngameMgr : MonoBehaviour
                     fireCombo = 13;
                     isSuperFeverOn = false;
                 }
+                JudgeTileFunc();
+                SoundManager.instance.PlayerSound("Put");
             }
             else
+            {
                 tempTileSelectNode.isSpecialTilemoved = false;
-            isOnlySelect = false;
+                SoundManager.instance.PlayerSound("Select");
+            }
             tempTileSelectNode.SelectOrDeselectFunc(false);
-            JudgeTileFunc();
+
         }
         selectedKeyDirection = direction;
     }
@@ -837,10 +940,9 @@ public class SDJRIngameMgr : MonoBehaviour
     {
         if (isOnlySelect) return;
         //if (isTileGroupMove) return;
-        if (isSuperFeverLineSpawn) return;
+        //if (isSuperFeverLineSpawn) return;
 
-        for (int ii = 0; ii < 3; ii++)              //삭제할 리스트 초기화
-            deleteTileListArray[ii].Clear();
+        ClearDeleteListArrayFunc();
 
         //스페셜 타일들이 제대로 발동되지 않았을 때
         if (selectedTileObj != null)
@@ -848,15 +950,30 @@ public class SDJRIngameMgr : MonoBehaviour
             JudgeSpecialTileFunc(selectedTileObj);
             JudgeNormalTileFunc(selectedTileObj, true);
         }
-        else
+
+        while (deleteTileListArray[0].Count > 0 || deleteTileListArray[1].Count > 0 || deleteTileListArray[2].Count > 0)
+        {
+            DestroyExceptionFunc(selectedTileObj, tileListArray, deleteTileListArray);
+            for (int ii = 0; ii < 3; ii++)
+                UpdateTileListFunc(tileListArray[ii], ii);
+            ClearDeleteListArrayFunc();
             JudgeNormalTileFunc(selectedTileObj, false);
+        }
 
-        //선정된 타일들 제거
-        if (!(comboCount == fireCombo && !isSuperFeverOn) || !isHammerOn)
-            DestroyTileFunc(selectedTileObj, tileListArray, deleteTileListArray);
+        if (comboCount >= fireCombo && !isSuperFeverOn)
+        {
+            isSuperFeverOn = true;
+            ComboUpdateFunc();
+        }
 
+        isGameOver = JudgeGameOver();
+        GameOverFunc();
+    }
+
+    void ClearDeleteListArrayFunc()
+    {
         for (int ii = 0; ii < 3; ii++)
-            UpdateTileListFunc(tileListArray[ii], ii);
+            deleteTileListArray[ii].Clear();
     }
 
     void JudgeSpecialTileFunc(GameObject selectedTile)
@@ -893,6 +1010,8 @@ public class SDJRIngameMgr : MonoBehaviour
                 }
             }
             deleteTileListArray[movedTileNumber[0]].Add(movedTileNumber[1]);        //자신도 터지게
+            //bonusDelayTime = 0.1f;
+            //isBonusDelay = true;
         }
         else if (tempTileType == TileType.Special1)     //지우개
         {
@@ -905,18 +1024,16 @@ public class SDJRIngameMgr : MonoBehaviour
                     bombGuageCount++;
                 }
             }
-            bombGuageCount /= 2;
+            bombGuageCount *= 2;
+            bombGuageCount /= 3;                        //평상시의 2/3 정도만 차도록
         }
         else if (tempTileType == TileType.Special2)     //해머
         {
             deleteTileListArray[movedTileNumber[0]].Add(movedTileNumber[1]);        //자신도 터지게
             isHammerOn = true;
-            tempHammerPos = tileListArray[movedTileNumber[0]][movedTileNumber[1]].transform.position;
-            tempHammerPos.x += 50.0f;
-            hammerItemObj.transform.position = tempHammerPos;
+            hammerItemObj.transform.position = tileListArray[movedTileNumber[0]][movedTileNumber[1]].transform.position;
             hammerItemObj.SetActive(true);
             hammerDurationTime = 2.5f;
-            comboCount++;
             judgeComboCount = gameLevel + 2;
         }
         else if (tempTileType == TileType.Special3)     //한줄뿅
@@ -931,7 +1048,6 @@ public class SDJRIngameMgr : MonoBehaviour
         }
         comboCount++;
         judgeComboCount = gameLevel + 2;
-
         ComboTextFunc(comboCount);
     }
 
@@ -986,7 +1102,7 @@ public class SDJRIngameMgr : MonoBehaviour
         return false;
     }
 
-    void DestroyTileFunc(GameObject selectedTile, List<GameObject>[] tileList, List<int>[] delTileList)
+    void DestroyExceptionFunc(GameObject selectedTile, List<GameObject>[] tileList, List<int>[] delTileList)
     {
         if (selectedTile != null)
         {
@@ -998,7 +1114,7 @@ public class SDJRIngameMgr : MonoBehaviour
                 {
                     //tileList[ii][deleteTileListArray[ii][jj]] -> 터져야할 타일의 위치
                     //본인이 터질 방해타일이면 나중에 한꺼번에 터뜨리기 위해 예외처리
-                    tempDeleteTileType = tileList[ii][delTileList[ii][jj]].GetComponent<SDJRTileNode>().tileType;
+                    tempDeleteTileType = tileList[ii][delTileList[ii][jj]].GetComponent<SDJRTileNode>().tileType; 
                     if (tempDeleteTileType != TileType.Normal || tempDeleteTileType == TileType.GameOver ||
                         tempDeleteTileType == TileType.Bad1 || tempDeleteTileType == TileType.Bad2)
                         continue;
@@ -1011,7 +1127,7 @@ public class SDJRIngameMgr : MonoBehaviour
                         {
                             tempDeleteTileType = tileList[1][delTileList[ii][jj]].GetComponent<SDJRTileNode>().tileType;
                             if (tempDeleteTileType == TileType.Bad1 || tempDeleteTileType == TileType.Bad2 || tempDeleteTileType == TileType.GameOver)
-                                DestroyTileFunc1(tileList[1], delTileList[ii][jj], tileIndexListArray[1]);
+                                DestroyTileFunc(tileList[1], delTileList[ii][jj], tileIndexListArray[1]);
                         }
                     }
                     else if (ii == 1)
@@ -1022,7 +1138,7 @@ public class SDJRIngameMgr : MonoBehaviour
 							{
                                 tempDeleteTileType = tileList[kk][delTileList[ii][jj]].GetComponent<SDJRTileNode>().tileType;
                                 if (tempDeleteTileType == TileType.Bad1 || tempDeleteTileType == TileType.Bad2 || tempDeleteTileType == TileType.GameOver)
-                                    DestroyTileFunc1(tileList[kk], delTileList[ii][jj], tileIndexListArray[kk]);
+                                    DestroyTileFunc(tileList[kk], delTileList[ii][jj], tileIndexListArray[kk]);
                             }
 						}
 					}
@@ -1046,31 +1162,41 @@ public class SDJRIngameMgr : MonoBehaviour
                     gameTime += 10.0f;
                     if (gameTime >= maxTime) gameTime = maxTime;
                     plusShowTimer = 1.0f;
-                    timebarPosX = timebarImg.transform.position.x + (1440.0f / 60.0f) * 10.0f / screenScale;
+                    ////if (Time.timeScale != 0.0f && (0.0f < gameTime && gameTime <= 60.0f))
+                    ////    timebarImg.transform.Translate(Vector3.left * Time.deltaTime * (1440.0f / 60.0f) / screenScale);
+                    //if (Time.timeScale != 0.0f && (0.0f < gameTime && gameTime <= 60.0f))
+                    //    timebarRectTransform.anchoredPosition += Vector2.left * Time.deltaTime * (1440.0f / 60.0f) / screenScale;
+                    
+                    timebarPosX = timebarRectTransform.anchoredPosition.x + (1440.0f / 60.0f) * 10.0f / screenScale;                    
                     if (timebarPosX >= timebarMaxPos.x)
                         timebarPosX = timebarMaxPos.x;
-                    timebarImg.transform.position = new Vector3(timebarPosX, timebarImg.transform.position.y, timebarImg.transform.position.z);
-				}
+                    //timebarImg.transform.position = new Vector3(timebarPosX, timebarImg.transform.position.y, timebarImg.transform.position.z);
+                    timebarRectTransform.anchoredPosition = new Vector3(timebarPosX, timebarImg.transform.position.y, timebarImg.transform.position.z);
+                }
                 else if (tempDeleteTileType == TileType.Bonus)
 				{
                     //보너스 점수 메모리 풀 생성
                     tempBonusTextObj = MemoryPoolManager.instance.GetObject("BonusTextSpawnGroup");
+                    //bonusRectTransform = tempBonusTextObj.GetComponent<RectTransform>();
+                    //bonusRectTransform.anchoredPosition = tileList[ii][delTileList[ii][jj]].transform.position;
                     tempBonusTextObj.transform.position = tileList[ii][delTileList[ii][jj]].transform.position;
-                    tempBonusTextObj.transform.localScale = Vector3.one * 0.02f;
+                    tempBonusTextObj.transform.localScale = Vector3.one;
                     tempBonusTextObj.GetComponent<BonusText>().SetScore(GameKind.SDJR);
 				}
 
-                DestroyTileFunc1(tileList[ii], delTileList[ii][jj], tileIndexListArray[ii]);
+                DestroyTileFunc(tileList[ii], delTileList[ii][jj], tileIndexListArray[ii]);
+                
 			}
+            popSoundInt = UnityEngine.Random.Range(1, 6);
+            SoundManager.instance.PlayerSound("Pop" + popSoundInt);
 
-
-		}
+        }
 
 
         MinusGuageFunc();
     }
 
-    void DestroyTileFunc1(List<GameObject> destroyTargetList, int destroyTargetInt, List<int> destroyIndexList)
+    void DestroyTileFunc(List<GameObject> destroyTargetList, int destroyTargetInt, List<int> destroyIndexList)
     {
         ExplosionEffectFunc(destroyTargetList[destroyTargetInt]);
         destroyTargetList[destroyTargetInt].GetComponent<SDJRTileNode>().DestroyFunc();
@@ -1095,12 +1221,15 @@ public class SDJRIngameMgr : MonoBehaviour
     {
         tempExplosionEffectObj = MemoryPoolManager.instance.GetObject("ExplosionEffectGroup");
         tempExplosionEffectObj.transform.position = explodeTile.transform.position;
-        
+        tempExplosionEffectObj.transform.localScale = Vector3.one;
+        explosionParticleSystem = tempExplosionEffectObj.GetComponentsInChildren<ParticleSystem>();
+        for (int ii = 0; ii < explosionParticleSystem.Length; ii++)
+            explosionParticleSystem[ii].Play();
     }
 
     void AddScoreFunc(bool isBonus = false)
     {
-        bonusValue = 0;
+        bonusValue = 0;     //초기화
         if (superFeverTimer > 0.0f)
             bonusValue = (372.0f * (100.0f + tempLevel * 5) * 0.01f * (100.0f + comboCount * 3) * 0.01f * feverRate);
         else
@@ -1117,7 +1246,7 @@ public class SDJRIngameMgr : MonoBehaviour
         if (maxGuage <= currentGuage)
 		{
             currentGuage = 0.0f;
-
+            SoundManager.instance.PlayerSound("Bell");
             //폭탄 타일 생성 준비 완료로 변경
             isSpawn[6] = true;
 		}
@@ -1145,6 +1274,55 @@ public class SDJRIngameMgr : MonoBehaviour
         LevelUpdateFunc(tempCombo);
     }
 
+    void ComboUpdateFunc()
+    {
+        if (GlobalValue.g_SDJRUpgradeLv[2] < 1) return;
+
+        //임시로 게임 레벨을 저장, 이후 다시 돌려놓기
+        tempLevel = gameLevel;
+        gameLevel = 1;
+
+        //필드 클리어
+        ClearDeleteListArrayFunc();
+
+        bombGuageCount = 0;
+        for (int ii = 0; ii < 3; ii++)
+        {
+            if (tileListArray[ii].Count == 0)
+                continue;
+            for (int jj = 0; jj < tileListArray[ii].Count; jj++)
+            {
+                deleteTileListArray[ii].Add(jj);
+                bombGuageCount++;
+            }
+        }
+        bombGuageCount /= 2;
+
+        DestroyExceptionFunc(null, tileListArray, deleteTileListArray);
+
+        for (int ii = 0; ii < 3; ii++)
+            UpdateTileListFunc(tileListArray[ii], ii);
+
+        superFeverTimer = superRate;
+
+
+        //맨 처음 라인 형성
+        for (int ii = 0; ii < 3; ii++)
+            tileListArray[ii].Clear();
+
+        for (int ii = 0; ii < 3; ii++)
+            UpdateTileListFunc(tileListArray[ii], ii);
+        InitLineSpawnFunc();
+
+        if (comboCount < 50)
+            comboCountImage.SetComboEffectKindFunc(ComboCountEffectImage.ComboEffectKind.Fever);
+        else
+            comboCountImage.SetComboEffectKindFunc(ComboCountEffectImage.ComboEffectKind.Fyah);
+
+        SoundManager.instance.PlayerSound("Transform");
+        
+    }
+
     void LevelUpdateFunc(int tempCombo)
 	{
         if (6 <= gameLevel) return;
@@ -1170,12 +1348,7 @@ public class SDJRIngameMgr : MonoBehaviour
         else if (direction == KeyDirection.Down)
             HammerDestroyFunc(1);
         else if (direction == KeyDirection.Right)
-            HammerDestroyFunc(2);
-
-        comboCount++;
-        ComboTextFunc(comboCount);
-        AddScoreFunc();
-        DestroyTileFunc(null, tileListArray, deleteTileListArray);
+            HammerDestroyFunc(2);        
     }
 
     void HammerDestroyFunc(int columnIndex)
@@ -1183,6 +1356,34 @@ public class SDJRIngameMgr : MonoBehaviour
         if (tileListArray[columnIndex].Count == 0) return;  //선택한 곳에 타일이 하나도 없다면 파괴 못하게
         hammerItemObj.transform.position = tileListArray[columnIndex][tileListArray[columnIndex].Count - 1].transform.position;
         deleteTileListArray[columnIndex].Add(tileListArray[columnIndex].Count - 1);
+        DestroyExceptionFunc(null, tileListArray, deleteTileListArray);
+        comboCount++;
+        ComboTextFunc(comboCount);
+        AddScoreFunc();
+        if (comboCount >= fireCombo && !isSuperFeverOn)
+        {
+            isSuperFeverOn = true;
+            ComboUpdateFunc();
+        }
+    }
+
+    public void CoverTileForSeconds(float duration)
+    {
+        if (coverTileCoroutine != null)
+            StopCoroutine(coverTileCoroutine);
+
+        coverTileCoroutine = StartCoroutine(CoverTileCoroutine(duration));
+    }
+
+    private IEnumerator CoverTileCoroutine(float duration)
+    {
+        
+        BadTile2ImageOnOff(true);
+
+        yield return new WaitForSeconds(duration);
+
+        BadTile2ImageOnOff(false);
+        coverTileCoroutine = null;
     }
 
     public void ReverseForSeconds(float duration)
@@ -1201,6 +1402,32 @@ public class SDJRIngameMgr : MonoBehaviour
 
         SetReverseFunc(false);
         reverseCoroutine = null;
+    }
+
+    void GameOverFunc()
+    {
+        if (!isGameOver) return;
+        gameoverPanelObj.SetActive(true);
+        gameoverPanelObj.GetComponent<GameOverPanel>().TimeUpOrGameOver(false);
+        gameoverSoundInt = UnityEngine.Random.Range(0, 3);
+        SoundManager.instance.PlayerSound("GameOver" + gameoverSoundInt);
+        MusicManager.instance.StopMusic();
+        //게임 오버 사운드
+    }
+
+    public void PauseBtnFunc(bool isPause)
+    {
+        if (pausePanelObj == null) return;
+        if (readyPanelObj.activeSelf) return;
+        if (isPause)
+        {
+            Time.timeScale = 0.0f;
+            SoundManager.instance.PauseAllSound();
+            SoundManager.instance.PlayerSound("Button");
+        }
+        else Time.timeScale = 1.0f;
+        MusicManager.instance.PauseResumeMusic(isPause);
+        pausePanelObj.gameObject.SetActive(isPause);
     }
 }
 
