@@ -40,6 +40,7 @@ public class TitleMgr : MonoBehaviour
         });
 
         MusicManager.instance.PlayMusic("MainBGM");
+        StartCoroutine(SoundManager.instance.PlaySoundInAdvance());
     }
 
     //void Update() => UpdateFunc();

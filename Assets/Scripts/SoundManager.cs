@@ -85,19 +85,29 @@ namespace Enut4LJR
             else
                 volume = vol * GlobalValue.masterVolume * GlobalValue.effectVolume;
 
-            if (clip && soundSourceList[thisSoundCount])
-            {
-                soundSourceList[thisSoundCount].transform.position = transform.position;
-                soundSourceList[thisSoundCount].spatialBlend = 0.0f;
-                soundSourceList[thisSoundCount].clip = clip;
-                soundSourceList[thisSoundCount].volume = volume;
-                soundSourceList[thisSoundCount].loop = false;
-                soundSourceList[thisSoundCount].Play();
-                effectSound[thisSoundCount] = volume;
+            int idx = GetFreeSoundIndex();
 
-                thisSoundCount++;
-                if (thisSoundCount >= effectSoundCount) thisSoundCount = 0;
-            }
+            var src = soundSourceList[idx];
+            src.transform.position = transform.position;
+            src.spatialBlend = 0.0f;
+            src.clip = clip;
+            src.volume = volume;
+            src.loop = false;
+            src.Play();
+
+            //if (clip && soundSourceList[thisSoundCount])
+            //{
+            //    soundSourceList[thisSoundCount].transform.position = transform.position;
+            //    soundSourceList[thisSoundCount].spatialBlend = 0.0f;
+            //    soundSourceList[thisSoundCount].clip = clip;
+            //    soundSourceList[thisSoundCount].volume = volume;
+            //    soundSourceList[thisSoundCount].loop = false;
+            //    soundSourceList[thisSoundCount].Play();
+            //    effectSound[thisSoundCount] = volume;
+            //
+            //    thisSoundCount++;
+            //    if (thisSoundCount >= effectSoundCount) thisSoundCount = 0;
+            //}
         }
 
         public int PlaySoundIdx(string fileName)
@@ -327,6 +337,31 @@ namespace Enut4LJR
 
             MusicManager.instance.PlayMusic(nextClipName);
             //PlayBGM(nextClipName, bgmVolume);
+        }
+
+        public IEnumerator PlaySoundInAdvance()
+        {
+            foreach (var clip in checkClip)
+            {
+                audioSource.PlayOneShot(clip, 0.0f);
+
+                yield return null;
+            }
+
+            audioSource.Stop();
+        }
+
+        private int GetFreeSoundIndex()
+        {
+            for (int i = 0; i < effectSoundCount; i++)
+            {
+                if (!soundSourceList[i].isPlaying)
+                    return i;
+            }
+
+            int idx = thisSoundCount;
+            thisSoundCount = (thisSoundCount + 1) % effectSoundCount;
+            return idx;
         }
 
     }

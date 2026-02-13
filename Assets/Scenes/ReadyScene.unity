@@ -602,7 +602,6 @@ MonoBehaviour:
   rankingPanelObj: {fileID: 0}
   messageBoxObj: {fileID: 0}
   gameStartRiceTxt: {fileID: 0}
-  currTimeSec: 0
   riceBtn: {fileID: 943791777}
 --- !u!4 &156283439
 Transform:
@@ -4150,7 +4149,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &943791776
 RectTransform:
   m_ObjectHideFlags: 0

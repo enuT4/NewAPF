@@ -228,6 +228,9 @@ public class YSMSIngameMgr : MonoBehaviour
 
         if (pauseBtn != null)
             pauseBtn.onClick.AddListener(() => { PauseBtnFunc(true); });
+
+        PlaySoundBeforeGameStartFunc();
+        
     }
 
     void Update() => UpdateFunc();
@@ -888,6 +891,18 @@ public class YSMSIngameMgr : MonoBehaviour
         tempTimerObj.transform.localPosition = Vector3.zero;
         tempTimerObj.transform.localScale = Vector3.one;
 
+    }
+
+    void PlaySoundBeforeGameStartFunc()
+    {
+        SoundManager.instance.PlayerSound("FiveSecTick", 0.0f);
+        SoundManager.instance.PlayerSound("FiveSecTock", 0.0f); 
+        SoundManager.instance.PlayerSound("Bell", 0.0f); 
+        SoundManager.instance.PlayerSound("Whip", 0.0f); 
+        SoundManager.instance.PlayerSound("Fail", 0.0f); 
+        SoundManager.instance.PlayerSound("TimeUp", 0.0f); 
+        SoundManager.instance.PlayerSound("Transform", 0.0f); 
+        SoundManager.instance.PlayerSound("Button", 0.0f); 
     }
 
 }

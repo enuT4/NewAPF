@@ -2,6 +2,7 @@ using Enut4LJR;
 using PlayFab;
 using PlayFab.ClientModels;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -9,6 +10,16 @@ using UnityEngine.UI;
 
 public class ReadySceneMgr : MonoBehaviour
 {
+    public struct GameReadyInfo
+    {
+        public string gameName;
+        public string gameNameText;
+        public int[] itemCostArray;
+        public string[] itemInfo;
+        public int tutorialSkipYesNo;
+        public int activeChildIdx;
+    }
+
     [SerializeField] internal Button backBtn;
     [SerializeField] internal Button seeRankingBtn;
     [SerializeField] internal Text myRankTxt;
@@ -41,6 +52,7 @@ public class ReadySceneMgr : MonoBehaviour
     public static bool[] isItemChecked = new bool[4];
     int[] itemCostArr = new int[4];
     [SerializeField] internal Text[] itemCostTxtArr;
+    static Dictionary<GameKind, GameReadyInfo> gameConfigs = null;
 
     [Header("-------- Info Text --------")]
     [SerializeField] internal Text gameNameTxt;
@@ -161,18 +173,11 @@ public class ReadySceneMgr : MonoBehaviour
         if (!MusicManager.instance.IsMusicPlaying())
             MusicManager.instance.PlayMusic("MainBGM");
 
-        CheckGameName();
+        SetDictionaryFunc();
+        SetGameInfoDataFunc();
         UpgradeUpdate();
         UpdateRiceFunc();
 
-        for (int ii = 0; ii < isItemChecked.Length; ii++)
-        {
-            if (isItemChecked[ii]) isItemChecked[ii] = false;
-            checkImg[ii].gameObject.SetActive(isItemChecked[ii]);
-        }
-
-        for (int ii = 0; ii < itemCostTxtArr.Length; ii++)
-            itemCostTxtArr[ii].text = itemCostArr[ii].ToString();
 
         if (backBtn != null) backBtn.onClick.AddListener(() =>
         {
@@ -293,46 +298,6 @@ public class ReadySceneMgr : MonoBehaviour
         upgradePanelObj.SetActive(true);
     }
 
-    void CheckGameName()
-    {
-        for (int ii = 0; ii < itemBtnSpriteGroupObj.Length; ii++)
-        {
-            for (int jj = 0; jj < itemBtnSpriteGroupObj[ii].transform.childCount; jj++)
-                itemBtnSpriteGroupObj[ii].transform.GetChild(jj).gameObject.SetActive(false);
-        }
-
-        if (GlobalValue.g_GameKind == GameKind.YSMS)
-        {
-            if (GlobalValue.g_YSMSTutSkipYN == 1) isTutorialSkipOnOff = true;
-            gameName = "YSMS";
-            gameNameTxt.text = "삼촌의 니편내편";
-            itemCostArr = new int[4] { 700, 900, 1100, 1 };
-            
-            for (int ii = 0; ii < itemBtnSpriteGroupObj.Length; ii++)
-                itemBtnSpriteGroupObj[ii].transform.GetChild(0).gameObject.SetActive(true);
-        }
-        else if (GlobalValue.g_GameKind == GameKind.SDJR)
-        {
-            if (GlobalValue.g_SDJRTutSkipYN == 1) isTutorialSkipOnOff = true;
-            gameName = "SDJR";
-            gameNameTxt.text = "엄마의 삼단정리";
-            itemCostArr = new int[4] { 1100, 900, 800, 1 };
-
-            for (int ii = 0; ii < itemBtnSpriteGroupObj.Length; ii++)
-                itemBtnSpriteGroupObj[ii].transform.GetChild(1).gameObject.SetActive(true);
-        }
-        SetItemInfo(GlobalValue.g_GameKind);
-    }
-    void SetItemInfo(GameKind gKind)
-    {
-        if (gKind == GameKind.YSMS)
-            itemInfo = new string[4] { "[추가시간]타이머 5초 추가!", "[변신]일정 콤보마다 한 종류로 통일!",
-            "[스피드]틀렸을 때 더 빨리 회복돼요~", "[슈퍼피버시작]100콤보부터 시작하는 슈퍼피버~" };
-        else if (gKind == GameKind.SDJR)
-            itemInfo = new string[4] { "[지우개]모든 블록을 전부 다 지워줘요~!", "[뿅망치]누르는 모든 블록을 뿅뿅 없애줘요~",
-            "[한줄뿅]블록 한줄을 몽땅 없애줘요~", "[슈퍼피버시작]100콤보부터 시작하는 슈퍼피버~" };
-    }
-
     void ItemBtnFunc(int itemNum)
     {
         SoundManager.instance.PlayerSound("Button");
@@ -364,19 +329,54 @@ public class ReadySceneMgr : MonoBehaviour
             checkImg[ii].gameObject.SetActive(isItemChecked[ii]);
     }
 
+    void SetGameInfoDataFunc()
+    {
+        //체크 되어있는 상태라면 해제
+        for (int ii = 0; ii < isItemChecked.Length; ii++)
+        {
+            if (isItemChecked[ii]) isItemChecked[ii] = false;
+            checkImg[ii].gameObject.SetActive(isItemChecked[ii]);
+        }
+
+        for (int ii = 0; ii < itemBtnSpriteGroupObj.Length; ii++)
+        {
+            for (int jj = 0; jj < itemBtnSpriteGroupObj[ii].transform.childCount; jj++)
+                itemBtnSpriteGroupObj[ii].transform.GetChild(jj).gameObject.SetActive(false);
+        }
+
+        if (!gameConfigs.TryGetValue(GlobalValue.g_GameKind, out var config))
+        {
+            Debug.LogError("오류");
+            return;
+        }
+
+        isTutorialSkipOnOff = config.tutorialSkipYesNo == 1;
+        gameName = config.gameName;
+        gameNameTxt.text = config.gameNameText;
+        itemCostArr = config.itemCostArray;
+        for (int ii = 0; ii < itemBtnSpriteGroupObj.Length; ii++)
+            itemBtnSpriteGroupObj[ii].transform.GetChild(config.activeChildIdx).gameObject.SetActive(true);
+
+        
+
+        for (int ii = 0; ii < itemCostTxtArr.Length; ii++)
+            itemCostTxtArr[ii].text = itemCostArr[ii].ToString();
+    }
+
     public void UpgradeUpdate()
     {
-        if (GlobalValue.g_GameKind == GameKind.YSMS)
+        switch (GlobalValue.g_GameKind)
         {
-            GlobalValue.YSMSUpgradeAmount();
-            UpgradeAmountUpdate(GlobalValue.g_YSMSUpgradeLv[0], GlobalValue.g_YSMSUpgradeLv[1], GlobalValue.g_YSMSUpgradeLv[2]);
-            UpgradeLevelUpdate(GlobalValue.g_YSMSUpgradeLv[0], GlobalValue.g_YSMSUpgradeLv[1], GlobalValue.g_YSMSUpgradeLv[2]);
-        }
-        else if (GlobalValue.g_GameKind == GameKind.SDJR)
-        {
-            GlobalValue.SDJRUpgradeAmount();
-            UpgradeAmountUpdate(GlobalValue.g_SDJRUpgradeLv[0], GlobalValue.g_SDJRUpgradeLv[1], GlobalValue.g_SDJRUpgradeLv[2]);
-            UpgradeLevelUpdate(GlobalValue.g_SDJRUpgradeLv[0], GlobalValue.g_SDJRUpgradeLv[1], GlobalValue.g_SDJRUpgradeLv[2]);
+            case GameKind.YSMS:
+                GlobalValue.YSMSUpgradeAmount();
+                UpgradeAmountUpdate(GlobalValue.g_YSMSUpgradeLv[0], GlobalValue.g_YSMSUpgradeLv[1], GlobalValue.g_YSMSUpgradeLv[2]);
+                UpgradeLevelUpdate(GlobalValue.g_YSMSUpgradeLv[0], GlobalValue.g_YSMSUpgradeLv[1], GlobalValue.g_YSMSUpgradeLv[2]);
+                break;
+            case GameKind.SDJR:
+                GlobalValue.SDJRUpgradeAmount();
+                UpgradeAmountUpdate(GlobalValue.g_SDJRUpgradeLv[0], GlobalValue.g_SDJRUpgradeLv[1], GlobalValue.g_SDJRUpgradeLv[2]);
+                UpgradeLevelUpdate(GlobalValue.g_SDJRUpgradeLv[0], GlobalValue.g_SDJRUpgradeLv[1], GlobalValue.g_SDJRUpgradeLv[2]);
+                break;
         }
 
         userGoldTxt.text = GlobalValue.g_UserGold.ToString();
@@ -503,7 +503,6 @@ public class ReadySceneMgr : MonoBehaviour
 
             NetworkMgr.inst.PushPacket(PacketType.UserMoney);
 
-            //MusicManager.instance.StopMusic();
             SoundManager.instance.PlayerSound("GameStart");
             bgmFadeOutTimer = 1.0f;
 
@@ -572,6 +571,39 @@ public class ReadySceneMgr : MonoBehaviour
             gameStartRiceTxt.text = GlobalValue.g_RiceCount.ToString();
         Debug.Log((zeroRiceTimer / 60).ToString() + ":" + (zeroRiceTimer % 60).ToString("D2"));
         //Debug.Log(filledRiceCount.ToString() + ":" + timeSinceRiceFillTime.ToString() + ":" + remainRiceTime.ToString() + ":" + ((int)remainRiceTime / 60).ToString() + ":" + ((int)remainRiceTime % 60).ToString());
+    }
+
+    static void SetDictionaryFunc()
+    {
+        if (gameConfigs != null)
+            return;
+
+        gameConfigs = new Dictionary<GameKind, GameReadyInfo>
+        {
+            {
+                GameKind.YSMS, new GameReadyInfo{
+                    gameName = "YSMS",
+                    gameNameText = "삼촌의 니편내편",
+                    itemCostArray = new int[] {700, 900, 1100, 1},
+                    itemInfo = new string[4] { "[추가시간]타이머 5초 추가!", "[변신]일정 콤보마다 한 종류로 통일!",
+            "[스피드]틀렸을 때 더 빨리 회복돼요~", "[슈퍼피버시작]100콤보부터 시작하는 슈퍼피버~" },
+                    tutorialSkipYesNo = GlobalValue.g_YSMSTutSkipYN,
+                    activeChildIdx = 0
+                }
+            },
+            {
+                GameKind.SDJR, new GameReadyInfo{
+                    gameName = "SDJR",
+                    gameNameText = "엄마의 삼단정리",
+                    itemCostArray = new int[] {1100, 900, 800, 1},
+                    itemInfo = new string[4] { "[지우개]모든 블록을 전부 다 지워줘요~!", "[뿅망치]누르는 모든 블록을 뿅뿅 없애줘요~",
+            "[한줄뿅]블록 한줄을 몽땅 없애줘요~", "[슈퍼피버시작]100콤보부터 시작하는 슈퍼피버~" },
+                    tutorialSkipYesNo = GlobalValue.g_SDJRTutSkipYN,
+                    activeChildIdx = 1
+                }
+            }
+        };
+
     }
 
 }

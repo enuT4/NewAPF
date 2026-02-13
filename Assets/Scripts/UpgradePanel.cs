@@ -125,8 +125,15 @@ public class UpgradePanel : MonoBehaviour
 
     void UpdateUpgradeKind()
     {
-        if (GlobalValue.g_GameKind == GameKind.YSMS) UpdateYSMSUpgradeKind();
-        else if (GlobalValue.g_GameKind == GameKind.SDJR) UpdateSDJRUpgradeKind();
+        switch (GlobalValue.g_GameKind)
+        {
+            case (GameKind.YSMS):
+                UpdateYSMSUpgradeKind();
+                break;
+            case (GameKind.SDJR):
+                UpdateSDJRUpgradeKind();
+                break;
+        }
     }
 
     void UpdateYSMSUpgradeKind()
@@ -382,7 +389,6 @@ public class UpgradePanel : MonoBehaviour
                 GlobalValue.g_YSMSUpgradeLv[2]++;
             
             NetworkMgr.inst.PushPacket(PacketType.YSMSUpgradeLv);
-            ReadySceneMgr.inst.UpgradeUpdate();
         }
         else if (GlobalValue.g_GameKind == GameKind.SDJR)
         {
@@ -394,8 +400,8 @@ public class UpgradePanel : MonoBehaviour
                 GlobalValue.g_SDJRUpgradeLv[2]++;
 
             NetworkMgr.inst.PushPacket(PacketType.SDJRUpgradeLv);
-            ReadySceneMgr.inst.UpgradeUpdate();
         }
+        ReadySceneMgr.inst.UpgradeUpdate();
         SoundManager.instance.PlayerSound("LevelUp");
         UpdateUpgradeKind();
 
