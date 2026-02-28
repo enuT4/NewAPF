@@ -14,9 +14,6 @@ public class ReadyPanel : MonoBehaviour
 
     void Awake()
     {
-        SoundManager.instance.CallInstance();
-        MusicManager.instance.CallInstance();
-
         if (!readyImg) readyImg = transform.Find("ReadyImg").GetComponent<Image>();
         if (!goImg) goImg = transform.Find("GoImg").GetComponent<Image>();
     }
@@ -85,15 +82,16 @@ public class ReadyPanel : MonoBehaviour
     void ClassifyGameKindFunc()
     {
         //GlobalValue.g_GameKind = GameKind.SDJR;                     //수정수정
-        if (GlobalValue.g_GameKind == GameKind.YSMS)
+        switch (GlobalValue.g_GameKind)
         {
-            YSMSIngameMgr.inst.GameStartAfterReadyFunc();
-            MusicManager.instance.PlayMusic("YSMSIngameBGM", 0.5f);
-        }
-        else if (GlobalValue.g_GameKind == GameKind.SDJR)
-        {
-            SDJRIngameMgr.inst.GameStartAfterReadyFunc();
-            MusicManager.instance.PlayMusic("SDJRIngameBGM");
+            case (GameKind.YSMS):
+                YSMSIngameMgr.inst.GameStartAfterReadyFunc();
+                MusicManager.instance.PlayMusic("YSMSIngameBGM", 0.5f);
+                break;
+            case (GameKind.SDJR):
+                SDJRIngameMgr.inst.GameStartAfterReadyFunc();
+                MusicManager.instance.PlayMusic("SDJRIngameBGM");
+                break;
         }
     }
 }

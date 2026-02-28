@@ -19,6 +19,7 @@ public class BonusText : MemoryPoolObject
     Outline thisOutline;
     Color outlineColor;
     float screenScale;
+    Vector3 initPos;
 
     public static BonusText inst;
 
@@ -50,6 +51,8 @@ public class BonusText : MemoryPoolObject
         thisText.fontSize = (int)(thisText.fontSize * screenScale);
         
         textRectTransform = thisText.GetComponent<RectTransform>();
+
+        initPos = textRectTransform.anchoredPosition;
     }
 
     // Update is called once per frame
@@ -93,6 +96,7 @@ public class BonusText : MemoryPoolObject
             outlineColor.a = 1.0f;
             thisOutline.effectColor = outlineColor;
             effectTime = 0.0f;
+            textRectTransform.anchoredPosition = initPos;
             ObjectReturn();
         }
     }

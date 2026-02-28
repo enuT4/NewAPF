@@ -83,6 +83,6 @@ public class GlobalValue : MonoBehaviour
     public static float effectVolume = 1.0f;
     public static bool masterMute = false;
     public static bool musicMute = false;
-    public static bool effectMute = false;
+    public static bool soundMute = false;
 
 }

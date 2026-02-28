@@ -117,9 +117,6 @@ public class YSMSIngameMgr : MonoBehaviour
 
     void AwakeFunc()
     {
-        if (!SoundManager.instance) SoundManager.instance.CallInstance();
-        if (!MusicManager.instance) MusicManager.instance.CallInstance();
-
         inst = this;
 
         if (!bgImg) bgImg = GameObject.Find("Canvas").transform.Find("BGImg").GetComponent<Image>();
@@ -264,19 +261,19 @@ public class YSMSIngameMgr : MonoBehaviour
 
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            PauseBtnFunc(true);
-        }
+        //if (Input.GetKeyDown(KeyCode.Escape))
+        //{
+        //    PauseBtnFunc(true);
+        //}
 
 
 
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            screenScale = 1440.0f / Screen.width;
-            Debug.Log(Screen.width + " : " + screenScale);
-            Debug.Log(timebarImg.transform.localScale + "   :   " + timebarImg.rectTransform.sizeDelta);
-        }
+        //if (Input.GetKeyDown(KeyCode.G))
+        //{
+        //    screenScale = 1440.0f / Screen.width;
+        //    Debug.Log(Screen.width + " : " + screenScale);
+        //    Debug.Log(timebarImg.transform.localScale + "   :   " + timebarImg.rectTransform.sizeDelta);
+        //}
         //if (Input.GetKeyDown(KeyCode.H))
         //{
         //    //for(int ii = 0;ii<spawnList.Count;ii++)

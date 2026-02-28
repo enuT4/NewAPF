@@ -90,15 +90,16 @@ public class RankingPanel : MonoBehaviour
     
     void CheckGameName()
     {
-        if (GlobalValue.g_GameKind == GameKind.YSMS)
+        switch (GlobalValue.g_GameKind)
         {
-            gameName = "YSMS";
-            gameNameTxt.text = "ªÔ√Ã¿« ¥œ∆Ì≥ª∆Ì";
-        }
-        else if (GlobalValue.g_GameKind == GameKind.SDJR)
-        {
-            gameName = "SDJR";
-            gameNameTxt.text = "æˆ∏∂¿« ªÔ¥‹¡§∏Æ";
+            case (GameKind.YSMS):
+                gameName = "YSMS";
+                gameNameTxt.text = "ªÔ√Ã¿« ¥œ∆Ì≥ª∆Ì";
+                break;
+            case (GameKind.SDJR):
+                gameName = "SDJR";
+                gameNameTxt.text = "æˆ∏∂¿« ªÔ¥‹¡§∏Æ";
+                break;
         }
         GetRankingList(GlobalValue.g_GameKind);
     }
@@ -143,15 +144,16 @@ public class RankingPanel : MonoBehaviour
                 if (0 < result.Leaderboard.Count)
                 {
                     var curBoard = result.Leaderboard[0];
-                    if (gKind == GameKind.YSMS)
+                    switch (gKind)
                     {
-                        GlobalValue.g_MyYSMSRank = curBoard.Position + 1;
-                        GlobalValue.g_YSMSBestScore = curBoard.StatValue;
-                    }
-                    else if (gKind == GameKind.SDJR)
-                    {
-                        GlobalValue.g_MySDJRRank = curBoard.Position + 1;
-                        GlobalValue.g_SDJRBestScore = curBoard.StatValue;
+                        case (GameKind.YSMS):
+                            GlobalValue.g_MyYSMSRank = curBoard.Position + 1;
+                            GlobalValue.g_YSMSBestScore = curBoard.StatValue;
+                            break;
+                        case (GameKind.SDJR):
+                            GlobalValue.g_MySDJRRank = curBoard.Position + 1;
+                            GlobalValue.g_SDJRBestScore = curBoard.StatValue;
+                            break;
                     }
                 }
             },

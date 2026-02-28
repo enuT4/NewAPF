@@ -80,7 +80,7 @@ namespace Enut4LJR
 
             AudioClip clip = AudioClipCheck(fileName);
             float volume;
-            if (GlobalValue.effectMute || GlobalValue.masterMute) 
+            if (GlobalValue.soundMute || GlobalValue.masterMute) 
                 volume = 0.0f;
             else
                 volume = vol * GlobalValue.masterVolume * GlobalValue.effectVolume;
@@ -244,11 +244,17 @@ namespace Enut4LJR
         }
         */
 
-        public void PlayGUISound(string fileName, float volume = .2f)
+        public void PlayGUISound(string fileName, float vol = .2f)
         {
             if (!soundOnOff) return;
 
             AudioClip clip = AudioClipCheck(fileName);
+
+            float volume;
+            if (GlobalValue.soundMute || GlobalValue.masterMute)
+                volume = 0.0f;
+            else
+                volume = vol * GlobalValue.masterVolume * GlobalValue.effectVolume;
 
             if (!audioSource) return;
 

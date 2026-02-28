@@ -114,5 +114,13 @@ namespace Enut4LJR
             clipList.Clear();
             Resources.UnloadUnusedAssets();
         }
+
+        public void ApplyMute()
+        {
+            if (GlobalValue.masterMute || GlobalValue.musicMute)
+                audioSource.volume = 0f;
+            else
+                audioSource.volume = 1f;
+        }
     }
 }

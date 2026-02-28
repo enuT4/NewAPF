@@ -1307,6 +1307,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   showTime: 0
+  isGameStart: 0
+  isGameOver: 0
   bonusTileCooldown: 0
   bonusSpawnTime: 0
   eraserTileCooldown: 0
@@ -1321,10 +1323,13 @@ MonoBehaviour:
   badTile1EffectTimer: 0
   badTile2EffectTimer: 0
   badTile1EffectShowImg: {fileID: 0}
+  bombCount: 0
   isOnlySelect: 0
   isReverse: 0
   isTileHide: 0
   effectGroupobj: {fileID: 495597384}
+  currentScore: 0
+  gameLevel: 1
   fireCombo: 13
   pauseBtn: {fileID: 0}
 --- !u!1 &828498049

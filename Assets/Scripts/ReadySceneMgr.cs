@@ -98,9 +98,6 @@ public class ReadySceneMgr : MonoBehaviour
 
     void AwakeFunc()
     {
-        if (!SoundManager.instance) SoundManager.instance.CallInstance();
-        if (!MusicManager.instance) MusicManager.instance.CallInstance();
-
         #region UI 연결
         if (!bgImgObj) bgImgObj = GameObject.Find("Canvas").transform.Find("BGImg").gameObject;
         if (!backBtn) backBtn = bgImgObj.transform.Find("BackBtn").GetComponent<Button>();
@@ -270,10 +267,10 @@ public class ReadySceneMgr : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            UpdateRiceFunc();
-        }
+        //if (Input.GetKeyDown(KeyCode.G))
+        //{
+        //    UpdateRiceFunc();
+        //}
 
 
         //if (Input.GetKeyDown(KeyCode.G))
@@ -353,6 +350,7 @@ public class ReadySceneMgr : MonoBehaviour
         isTutorialSkipOnOff = config.tutorialSkipYesNo == 1;
         gameName = config.gameName;
         gameNameTxt.text = config.gameNameText;
+        itemInfo = config.itemInfo;
         itemCostArr = config.itemCostArray;
         for (int ii = 0; ii < itemBtnSpriteGroupObj.Length; ii++)
             itemBtnSpriteGroupObj[ii].transform.GetChild(config.activeChildIdx).gameObject.SetActive(true);
@@ -576,7 +574,10 @@ public class ReadySceneMgr : MonoBehaviour
     static void SetDictionaryFunc()
     {
         if (gameConfigs != null)
+        {
+            Debug.Log("Configs 널 에러");
             return;
+        }
 
         gameConfigs = new Dictionary<GameKind, GameReadyInfo>
         {

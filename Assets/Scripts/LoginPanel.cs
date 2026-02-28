@@ -197,76 +197,73 @@ public class LoginPanel : MonoBehaviour
 
             foreach (var eachStat in result.InfoResultPayload.PlayerStatistics)
             {
-                if (eachStat.StatisticName == "YSMSBestScore")
-                    GlobalValue.g_YSMSBestScore = eachStat.Value;
-                else if (eachStat.StatisticName == "SDJRBestScore")
-                    GlobalValue.g_SDJRBestScore = eachStat.Value;
-                else if (eachStat.StatisticName == "TotalScore")
-                    GlobalValue.g_TotalScore = eachStat.Value;
+                switch (eachStat.StatisticName)
+                {
+                    case ("YSMSBestScore"):
+                        GlobalValue.g_YSMSBestScore = eachStat.Value;
+                        break;
+                    case ("SDJRBestScore"):
+                        GlobalValue.g_SDJRBestScore = eachStat.Value;
+                        break;
+                    case ("TotalScore"):
+                        GlobalValue.g_TotalScore = eachStat.Value;
+                        break;
+                }
             }
 
             int tempValue = 0;
             foreach (var eachData in result.InfoResultPayload.UserData)
             {
-                if (eachData.Key == "UserGold")
+                switch (eachData.Key)
                 {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_UserGold = tempValue;
-                }
-                else if (eachData.Key == "UserGem")
-                {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_UserGem = tempValue;
-                }
-                else if (eachData.Key == "UserRice")
-                {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_RiceCount = tempValue;
-                }
-                else if (eachData.Key == "RiceFillTime")
-                {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_RiceFillTime = tempValue;
-                }
-                else if (eachData.Key == "YSMSBonusUGLv")
-                {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_YSMSUpgradeLv[0] = tempValue;
-                }
-                else if (eachData.Key == "YSMSFeverUGLv")
-                {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_YSMSUpgradeLv[1] = tempValue;
-                }
-                else if (eachData.Key == "YSMSSuperUGLv")
-                {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_YSMSUpgradeLv[2] = tempValue;
-                }
-                else if (eachData.Key == "YSMSTutSkipOnOff")
-                {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_YSMSTutSkipYN = tempValue;
-                }
-                else if (eachData.Key == "SDJRBonusUGLv")
-                {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_SDJRUpgradeLv[0] = tempValue;
-                }
-                else if (eachData.Key == "SDJRFeverUGLv")
-                {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_SDJRUpgradeLv[1] = tempValue;
-                }
-                else if (eachData.Key == "SDJRSuperUGLv")
-                {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_SDJRUpgradeLv[2] = tempValue;
-                }
-                else if (eachData.Key == "SDJRTutSkipOnOff")
-                {
-                    if (int.TryParse(eachData.Value.Value, out tempValue))
-                        GlobalValue.g_SDJRTutSkipYN = tempValue;
+                    case ("UserGold"):
+                        if (int.TryParse(eachData.Value.Value, out tempValue))
+                            GlobalValue.g_UserGold = tempValue;
+                        break;
+                    case ("UserGem"):
+                        if (int.TryParse(eachData.Value.Value, out tempValue))
+                            GlobalValue.g_UserGem = tempValue;
+                        break;
+                    case ("UserRice"):
+                        if (int.TryParse(eachData.Value.Value, out tempValue))
+                            GlobalValue.g_RiceCount = tempValue;
+                        break;
+                    case ("RiceFillTime"):
+                        if (int.TryParse(eachData.Value.Value, out tempValue))
+                            GlobalValue.g_RiceFillTime = tempValue;
+                        break;
+                    case ("YSMSBonusUGLv"):
+                        if (int.TryParse(eachData.Value.Value, out tempValue))
+                            GlobalValue.g_YSMSUpgradeLv[0] = tempValue;
+                        break;
+                    case ("YSMSFeverUGLv"):
+                        if (int.TryParse(eachData.Value.Value, out tempValue))
+                            GlobalValue.g_YSMSUpgradeLv[1] = tempValue;
+                        break;
+                    case ("YSMSSuperUGLv"):
+                        if (int.TryParse(eachData.Value.Value, out tempValue))
+                            GlobalValue.g_YSMSUpgradeLv[2] = tempValue;
+                        break;
+                    case ("YSMSTutSkipOnOff"):
+                        if (int.TryParse(eachData.Value.Value, out tempValue))
+                            GlobalValue.g_YSMSTutSkipYN = tempValue;
+                        break;
+                    case ("SDJRBonusUGLv"):
+                        if (int.TryParse(eachData.Value.Value, out tempValue))
+                            GlobalValue.g_SDJRUpgradeLv[0] = tempValue;
+                        break;
+                    case ("SDJRFeverUGLv"):
+                        if (int.TryParse(eachData.Value.Value, out tempValue))
+                            GlobalValue.g_SDJRUpgradeLv[1] = tempValue;
+                        break;
+                    case ("SDJRSuperUGLv"):
+                        if (int.TryParse(eachData.Value.Value, out tempValue))
+                            GlobalValue.g_SDJRUpgradeLv[2] = tempValue;
+                        break;
+                    case ("SDJRTutSkipOnOff"):
+                        if (int.TryParse(eachData.Value.Value, out tempValue))
+                            GlobalValue.g_SDJRTutSkipYN = tempValue;
+                        break;
                 }
             }
         }

@@ -33,7 +33,7 @@ public class SDJRIngameMgr : MonoBehaviour
     [SerializeField]int showTime;
     bool isTimeUp = false;
     [SerializeField]bool isGameStart = false;
-    bool isGameOver = false;
+    [SerializeField]bool isGameOver = false;
     int gameoverSoundInt = -1;
     GameObject tempTimerObj = null;
 
@@ -194,9 +194,6 @@ public class SDJRIngameMgr : MonoBehaviour
 
     private void Awake()
     {
-        if (!SoundManager.instance) SoundManager.instance.CallInstance();
-        if (!MusicManager.instance) MusicManager.instance.CallInstance();
-
         if (!bgImgObj) bgImgObj = GameObject.Find("Canvas").transform.Find("BgImg").gameObject;
         if (!guageBackImg) guageBackImg = bgImgObj.transform.Find("GuageBack").GetComponent<Image>();
         if (!guageBarImg) guageBarImg = guageBackImg.transform.GetChild(0).GetComponent<Image>();
@@ -253,8 +250,7 @@ public class SDJRIngameMgr : MonoBehaviour
         for (int ii = 0; ii < isSpawn.Length; ii++)
             isSpawn[ii] = false;
 
-        if (spawnLineBtn != null)
-            spawnLineBtn.onClick.AddListener(() => { SpawnLineFunc(true); });
+        
 
         if (pauseBtn != null)
             pauseBtn.onClick.AddListener(() => { PauseBtnFunc(true); });
@@ -266,7 +262,11 @@ public class SDJRIngameMgr : MonoBehaviour
         if (downTouchBtn != null)
             downTouchBtn.onClick.AddListener(() => { downKeyAction?.Invoke(); });
 
-         if (hammerItemObj.activeSelf) hammerItemObj.SetActive(false);
+        if (spawnLineBtn != null)
+            spawnLineBtn.onClick.AddListener(() => { SpawnLineFunc(true); });
+
+
+        if (hammerItemObj.activeSelf) hammerItemObj.SetActive(false);
 
         guageAmount = 3.2f;
         currentGuage = 0.0f;
@@ -295,19 +295,7 @@ public class SDJRIngameMgr : MonoBehaviour
 
         CheckTimeStateFunc(gameTime);
 
-        if (0.0f < plusShowTimer)
-        {
-            if (!plus10SecImg.gameObject.activeSelf)
-                plus10SecImg.gameObject.SetActive(true);
-            plusShowTimer -= Time.deltaTime;
-            if (plusShowTimer < 0.0f)
-            {
-                plusShowTimer = 0.0f;
-                plus10SecImg.gameObject.SetActive(false);
-            }
-        }
-
-        if (!isGameOver && 0.0f < lineSpawnDelayTime && 0.0f < gameTime)
+        if (0.0f < lineSpawnDelayTime && 0.0f < gameTime)
         {
             lineSpawnDelayTime -= Time.deltaTime;
             if (lineSpawnDelayTime < 0.0f)
@@ -330,10 +318,10 @@ public class SDJRIngameMgr : MonoBehaviour
         DurationTimeFunc();
 
 
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            Debug.Log(GlobalValue.g_GameKind);
-        }
+        //if (Input.GetKeyDown(KeyCode.G))
+        //{
+        //    Debug.Log(GlobalValue.g_GameKind);
+        //}
 
     }
 
@@ -469,14 +457,18 @@ public class SDJRIngameMgr : MonoBehaviour
             else
                 continue;
         }
-        if (tempTileIdx == 0) return TileType.Bonus;            //보너스
-        else if (tempTileIdx == 1) return TileType.Special1;    //지우개
-        else if (tempTileIdx == 2) return TileType.Special2;    //해머
-        else if (tempTileIdx == 3) return TileType.Special3;    //한줄
-        else if (tempTileIdx == 4) return TileType.Bad1;        //방해타일1
-        else if (tempTileIdx == 5) return TileType.Bad2;        //방해타일2
-        else if (tempTileIdx == 6) return TileType.Bomb;        //폭탄
-        else return TileType.Normal;                            //일반타일
+
+        switch (tempTileIdx)
+        {
+            case 0 : return TileType.Bonus;             //보너스
+            case 1 : return TileType.Special1;          //지우개
+            case 2 : return TileType.Special2;          //해머
+            case 3 : return TileType.Special3;          //한줄뿅
+            case 4 : return TileType.Bad1;              //방해타일1
+            case 5 : return TileType.Bad2;              //방해타일2
+            case 6 : return TileType.Bomb;              //폭탄
+            default: return TileType.Normal;            //일반타일
+        }           
     }
 
     public void GameStartAfterReadyFunc()
@@ -492,6 +484,7 @@ public class SDJRIngameMgr : MonoBehaviour
     {   //라인 스폰 함수
         if (pausePanelObj.activeSelf) return;
         //if (0.0f < lineSpawnDelayTime) return;
+        if (!isGameStart) return;
         if (isGameOver || isTimeUp) return;
 
 
@@ -757,6 +750,7 @@ public class SDJRIngameMgr : MonoBehaviour
     {
         HammerTimerFunc();              //해머 아이템 지속시간 함수
         SuperFeverTimerFunc();          //슈퍼피버 지속시간 함수
+        PlusShowTimerFunc();            //10초 이미지 지속시간 함수
     }
 
     void HammerTimerFunc()
@@ -810,6 +804,21 @@ public class SDJRIngameMgr : MonoBehaviour
         }
     }
 
+    void PlusShowTimerFunc()
+    {
+        if (0.0f < plusShowTimer)
+        {
+            if (!plus10SecImg.gameObject.activeSelf)
+                plus10SecImg.gameObject.SetActive(true);
+            plusShowTimer -= Time.deltaTime;
+            if (plusShowTimer < 0.0f)
+            {
+                plusShowTimer = 0.0f;
+                plus10SecImg.gameObject.SetActive(false);
+            }
+        }
+    }
+
     #endregion
 
 
@@ -835,6 +844,7 @@ public class SDJRIngameMgr : MonoBehaviour
     void ActionFunc(KeyDirection direction)
     {
         if (isGameOver || isTimeUp) return;
+        if (!isGameStart) return;
         if (pausePanelObj.activeSelf) return;
         if (isHammerOn)
             HammerSelectFunc(direction);
@@ -925,15 +935,13 @@ public class SDJRIngameMgr : MonoBehaviour
 
     int SelectedDirectionToInt(KeyDirection direction)
     {
-        if (direction == KeyDirection.Left)
-            return 0;
-        else if (direction == KeyDirection.Down)
-            return 1;
-        else if (direction == KeyDirection.Right)
-            return 2;
-        else
-            return -1;
-
+        switch (direction)
+        {
+            case KeyDirection.Left: return 0;
+            case KeyDirection.Down: return 1;
+            case KeyDirection.Right: return 2;
+            default: return -1;
+        }
     }
 
     void JudgeTileFunc()
@@ -981,70 +989,66 @@ public class SDJRIngameMgr : MonoBehaviour
         tempTileType = selectedTile.GetComponent<SDJRTileNode>().tileType;
         if (tempTileType == TileType.Normal) return;                        //특수타일 경우만 고려
 
-        if (tempTileType == TileType.Bomb)              //폭탄
+        switch (tempTileType)
         {
-            bombGuageCount = 0;
-            for (int ii = movedTileNumber[0] - 1; ii < movedTileNumber[0] + 2; ii++)
-            {
-                if (ii < 0 || ii > 2) continue;     //왼쪽이나 오른쪽일 때 out of range 방지
-                for (int jj = movedTileNumber[1] - 2; jj < movedTileNumber[1] + 3; jj++)
+            case (TileType.Bomb):                           //폭탄
+                bombGuageCount = 0;
+                for (int ii = movedTileNumber[0] - 1; ii < movedTileNumber[0] + 2; ii++)
                 {
-                    if (jj < 0 || jj > tileListArray[ii].Count - 1) continue;
-                    deleteTileListArray[ii].Add(jj);
-                    bombGuageCount++;   
+                    if (ii < 0 || ii > 2) continue;     //왼쪽이나 오른쪽일 때 out of range 방지
+                    for (int jj = movedTileNumber[1] - 2; jj < movedTileNumber[1] + 3; jj++)
+                    {
+                        if (jj < 0 || jj > tileListArray[ii].Count - 1) continue;
+                        deleteTileListArray[ii].Add(jj);
+                        bombGuageCount++;
+                    }
                 }
-            }
-        }
-        else if (tempTileType == TileType.Bonus)        //보너스
-        {
-            if (movedTileNumber[1] != 0 && selectedTile != null)
-            {
-                tempTileIdx = tileIndexListArray[movedTileNumber[0]][movedTileNumber[1] - 1];
+                break;
+            case (TileType.Bonus):                          //보너스
+                if (movedTileNumber[1] != 0 && selectedTile != null)
+                {
+                    tempTileIdx = tileIndexListArray[movedTileNumber[0]][movedTileNumber[1] - 1];
+                    for (int ii = 0; ii < 3; ii++)
+                    {
+                        for (int jj = 0; jj < tileListArray[ii].Count; jj++)
+                        {
+                            if (tileListArray[ii][jj].GetComponent<SDJRTileNode>().tileIdx == tempTileIdx)
+                                deleteTileListArray[ii].Add(jj);
+                        }
+                    }
+                }
+                deleteTileListArray[movedTileNumber[0]].Add(movedTileNumber[1]);        //자신도 터지게
+                break;
+            case (TileType.Special1):                       //지우개
+                bombGuageCount = 0;
                 for (int ii = 0; ii < 3; ii++)
                 {
                     for (int jj = 0; jj < tileListArray[ii].Count; jj++)
                     {
-                        if (tileListArray[ii][jj].GetComponent<SDJRTileNode>().tileIdx == tempTileIdx)
-                            deleteTileListArray[ii].Add(jj);
+                        deleteTileListArray[ii].Add(jj);
+                        bombGuageCount++;
                     }
                 }
-            }
-            deleteTileListArray[movedTileNumber[0]].Add(movedTileNumber[1]);        //자신도 터지게
-            //bonusDelayTime = 0.1f;
-            //isBonusDelay = true;
-        }
-        else if (tempTileType == TileType.Special1)     //지우개
-        {
-            bombGuageCount = 0;
-            for (int ii = 0; ii < 3; ii++)
-            {
-                for (int jj = 0; jj < tileListArray[ii].Count; jj++)
+                bombGuageCount *= 2;
+                bombGuageCount /= 3;                        //UX : 평상시의 2/3 정도만 차도록
+                break;
+            case (TileType.Special2):                       //해머
+                deleteTileListArray[movedTileNumber[0]].Add(movedTileNumber[1]);        //자신도 터지게
+                isHammerOn = true;
+                hammerItemObj.transform.position = tileListArray[movedTileNumber[0]][movedTileNumber[1]].transform.position;
+                hammerItemObj.SetActive(true);
+                hammerDurationTime = 2.5f;
+                judgeComboCount = gameLevel + 2;
+                break;
+            case (TileType.Special3):                       //한줄뿅
+                bombGuageCount = 0;
+                for (int jj = 0; jj < tileListArray[movedTileNumber[0]].Count; jj++)
                 {
-                    deleteTileListArray[ii].Add(jj);
+                    deleteTileListArray[movedTileNumber[0]].Add(jj);
                     bombGuageCount++;
                 }
-            }
-            bombGuageCount *= 2;
-            bombGuageCount /= 3;                        //평상시의 2/3 정도만 차도록
-        }
-        else if (tempTileType == TileType.Special2)     //해머
-        {
-            deleteTileListArray[movedTileNumber[0]].Add(movedTileNumber[1]);        //자신도 터지게
-            isHammerOn = true;
-            hammerItemObj.transform.position = tileListArray[movedTileNumber[0]][movedTileNumber[1]].transform.position;
-            hammerItemObj.SetActive(true);
-            hammerDurationTime = 2.5f;
-            judgeComboCount = gameLevel + 2;
-        }
-        else if (tempTileType == TileType.Special3)     //한줄뿅
-        {
-            bombGuageCount = 0;
-            for (int jj = 0; jj < tileListArray[movedTileNumber[0]].Count; jj++)
-            {
-                deleteTileListArray[movedTileNumber[0]].Add(jj);
-                bombGuageCount++;
-            }
-            bombGuageCount /= 2;
+                bombGuageCount /= 2;
+                break;
         }
         comboCount++;
         judgeComboCount = gameLevel + 2;

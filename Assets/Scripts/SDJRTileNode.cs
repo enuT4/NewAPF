@@ -84,7 +84,7 @@ public class SDJRTileNode : MemoryPoolObject
                 tileIdx = (tileIdx == gameLevel) ? 0 : tileIdx + 1;     //중복 방지
         }
         else
-            CheckTileTypeFunc(tileType);
+            tileIdx = ChooseTileIdx(tileType);
 
         SetTileIndexFunc(tileIdx);
     }
@@ -101,27 +101,26 @@ public class SDJRTileNode : MemoryPoolObject
         tileGroupArray[tileIdx].SetActive(true);
     }
 
-    void CheckTileTypeFunc(TileType tileType)
+    int ChooseTileIdx(TileType tType)
     {
-        if (tileType == TileType.Bonus) tileIdx = 7;
-        else if (tileType == TileType.Bomb) tileIdx = 8;
-        else if (tileType == TileType.Special1) tileIdx = 9;
-        else if (tileType == TileType.Special2) tileIdx = 10;
-        else if (tileType == TileType.Special3) tileIdx = 11;
-        else if (tileType == TileType.Bad1)
+        switch (tType)
         {
-            tileIdx = 12;
-            badCountImg.SetActive(true);
-            badCountTimer = 10.0f;
+            case (TileType.Bonus):return 7;
+            case (TileType.Bomb):return 8;
+            case (TileType.Special1):return 9;
+            case (TileType.Special2):return 10;
+            case (TileType.Special3):return 11;
+            case (TileType.Bad1):
+                badCountImg.SetActive(true);
+                badCountTimer = 10.0f;
+                return 12;
+            case (TileType.Bad2):
+                badCountImg.SetActive(true);
+                badCountTimer = 10.0f;
+                return 13;
+            case (TileType.GameOver):return 14;
+            default:return -1;
         }
-        else if (tileType == TileType.Bad2)
-        {
-            tileIdx = 13;
-            badCountImg.SetActive(true);
-            badCountTimer = 10.0f;
-        }
-        else if (tileType == TileType.GameOver) tileIdx = 14;
-
     }
 
     void BadTilePenaltyFunc()

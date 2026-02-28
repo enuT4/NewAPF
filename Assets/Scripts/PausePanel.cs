@@ -12,6 +12,8 @@ public class PausePanel : MonoBehaviour
     [SerializeField] internal Button gotolobbyBtn;
     [SerializeField] internal GameObject gamehelpPanelObj;
     [SerializeField] internal Button gamehelpPanelCloseBtn;
+    [SerializeField] internal Button settingBtn;
+    [SerializeField] internal GameObject settingPanelObj;
     GameObject[] gamehelpImgArr;
     int gameCount;
 
@@ -28,6 +30,8 @@ public class PausePanel : MonoBehaviour
         if (!gotolobbyBtn) gotolobbyBtn = transform.Find("GotoLobbyBtn").GetComponent<Button>();
         if (!gamehelpPanelObj) gamehelpPanelObj = transform.Find("GameHelpPanelImg").gameObject;
         if (!gamehelpPanelCloseBtn) gamehelpPanelCloseBtn = gamehelpPanelObj.transform.GetChild(1).GetComponent<Button>();
+        if (!settingBtn) settingBtn = transform.Find("SettingBtn").GetComponent<Button>();
+        if (!settingPanelObj) settingPanelObj = transform.Find("SettingPanelObj").gameObject;
         if (msgBoxObj != null) msgBox = msgBoxObj.GetComponent<MessageBox>();
         if (gamehelpPanelObj != null) gameCount = gamehelpPanelObj.transform.Find("GameHelp").transform.childCount;
         gamehelpImgArr = new GameObject[gameCount];
@@ -40,19 +44,26 @@ public class PausePanel : MonoBehaviour
     {
         if (gamehelpPanelObj != null && gamehelpPanelObj.activeSelf)
             gamehelpPanelObj.SetActive(false);
+        if (settingPanelObj != null && settingPanelObj.activeSelf)
+            settingPanelObj.SetActive(false);
 
         if (continueBtn != null)
             continueBtn.onClick.AddListener(() =>
             {
                 SoundManager.instance.PlayerSound("Button");
                 //게임 일시정지 풀렸을 때 콤보 및 시간 재개 함수
-                if (GlobalValue.g_GameKind == GameKind.YSMS)
-                    YSMSIngameMgr.inst.PauseBtnFunc(false);
-                else if (GlobalValue.g_GameKind == GameKind.SDJR)
-                    SDJRIngameMgr.inst.PauseBtnFunc(false);
-                else
-                    Debug.Log("gamekind 설정 안됨");
-
+                switch (GlobalValue.g_GameKind)
+                {
+                    case (GameKind.YSMS):
+                        YSMSIngameMgr.inst.PauseBtnFunc(false);
+                        break;
+                    case (GameKind.SDJR):
+                        SDJRIngameMgr.inst.PauseBtnFunc(false);
+                        break;
+                    default:
+                        Debug.Log("gamekind 설정 안됨");
+                        break;
+                }
             });
 
         if (restartBtn != null)
@@ -91,6 +102,14 @@ public class PausePanel : MonoBehaviour
                     gamehelpPanelObj.SetActive(false);
             });
 
+        if (settingBtn != null)
+            settingBtn.onClick.AddListener(() =>
+            {
+                SoundManager.instance.PlayerSound("Button");
+                if (settingPanelObj != null)
+                    settingPanelObj.SetActive(true);
+            });
+
         if(msgBoxObj.activeSelf) msgBoxObj.SetActive(false);
 
         CheckGameHelpFunc();
@@ -112,10 +131,14 @@ public class PausePanel : MonoBehaviour
                 gamehelpImgArr[ii].SetActive(false);
         }
 
-        if (GlobalValue.g_GameKind == GameKind.YSMS)
-            gamehelpImgArr[0].SetActive(true);
-        else if (GlobalValue.g_GameKind == GameKind.SDJR)
-            gamehelpImgArr[1].SetActive(true);
-
+        switch (GlobalValue.g_GameKind)
+        {
+            case (GameKind.YSMS):
+                gamehelpImgArr[0].SetActive(true);
+                break;
+            case (GameKind.SDJR):
+                gamehelpImgArr[1].SetActive(true);
+                break;
+        }
     }
 }
