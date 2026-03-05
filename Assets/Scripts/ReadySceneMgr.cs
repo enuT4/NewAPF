@@ -504,7 +504,7 @@ public class ReadySceneMgr : MonoBehaviour
             SoundManager.instance.PlayerSound("GameStart");
             bgmFadeOutTimer = 1.0f;
 
-            //수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ수정수정ㅁ
+            //튜토리얼은 일단 삭제
             //if (!isTutorialSkipOnOff)
             //    SceneManager.LoadScene("TutorialScene");
             //else

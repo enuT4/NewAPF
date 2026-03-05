@@ -81,7 +81,7 @@ public class ReadyPanel : MonoBehaviour
 
     void ClassifyGameKindFunc()
     {
-        //GlobalValue.g_GameKind = GameKind.SDJR;                     //수정수정
+        //GlobalValue.g_GameKind = GameKind.SDJR;
         switch (GlobalValue.g_GameKind)
         {
             case (GameKind.YSMS):

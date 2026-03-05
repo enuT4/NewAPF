@@ -436,7 +436,6 @@ public class SDJRIngameMgr : MonoBehaviour
         else if(!isTileHide && tempTileNode.blockedTileImg.activeSelf)
             tempTileNode.blockedTileImg.SetActive(false);
 
-        //tempTileNode.SetTileIndexFunc(tempTileNode.tileIdx);      //수정수정 -> 굳이 이함수를 넣지 않아도 될 것 같은데?
         if (tempTileNode == null) Debug.Log("이거");
         if (tileIndexList == null) Debug.Log("이거2");
         tileIndexList.Insert(0, tempTileNode.tileIdx);

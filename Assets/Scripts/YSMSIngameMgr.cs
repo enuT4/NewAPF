@@ -27,7 +27,7 @@ public class YSMSIngameMgr : MonoBehaviour
     [SerializeField] internal GameObject pausePanelObj;
     ComboText tempComboText;
 
-    float gameTime = 20.0f;                         //수정수정
+    float gameTime = 60.0f;
     float maxTime = 60.0f;
     [HideInInspector] public int currentScore = 0;
     float scoreRate = 0.0f;
