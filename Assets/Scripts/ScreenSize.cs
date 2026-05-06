@@ -8,8 +8,8 @@ public class ScreenSize : MonoBehaviour
     int setWidth = 1440;
     int setHeight = 3200;
 
-    int deviceWidth = Screen.width;
-    int deviceHeight = Screen.height;
+    int deviceWidth;
+    int deviceHeight;
 
     float newWidth = 0.0f;
     float newHeight = 0.0f;
@@ -18,6 +18,9 @@ public class ScreenSize : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        deviceWidth = Screen.width;
+        deviceHeight = Screen.height;
+
         SetScreenSize();
     }
 
@@ -31,7 +34,7 @@ public class ScreenSize : MonoBehaviour
 
     void SetScreenSize()
     {
-        Screen.SetResolution(setWidth, (int)(((float)deviceHeight / deviceWidth) * setWidth), true);
+        Screen.SetResolution(setWidth, setHeight, false);
 
         if ((float)setWidth / setHeight < (float)setWidth / deviceHeight)
         {

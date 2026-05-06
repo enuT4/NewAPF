@@ -178,11 +178,13 @@ public class ReadySceneMgr : MonoBehaviour
 
         if (backBtn != null) backBtn.onClick.AddListener(() =>
         {
+            if (bgmFadeOutTimer > 0.0f) return;
             SoundManager.instance.PlayerSound("Button");
             SceneManager.LoadScene("LobbyScene");
         });
         if (seeRankingBtn != null) seeRankingBtn.onClick.AddListener(() =>
         {
+            if (bgmFadeOutTimer > 0.0f) return;
             SoundManager.instance.PlayerSound("Button");
             rankingPanelObj.SetActive(true);
         });
@@ -208,6 +210,7 @@ public class ReadySceneMgr : MonoBehaviour
         if (charShopBtn != null)
             charShopBtn.onClick.AddListener(() =>
             {
+                if (bgmFadeOutTimer > 0.0f) return;
                 SoundManager.instance.PlayerSound("Button");
                 messageBoxObj.SetActive(true);
                 msgBox.SetMessageText("미구현 알림", "다음 업데이트를 기다려주세요 ㅠ0ㅠ", MessageState.OK);
@@ -290,6 +293,7 @@ public class ReadySceneMgr : MonoBehaviour
 
     void UpBtnFunc(UpgradeKind ugKind)
     {
+        if (bgmFadeOutTimer > 0.0f) return;
         SoundManager.instance.PlayerSound("Button");
         ugPanel.ugKind = ugKind;
         upgradePanelObj.SetActive(true);
@@ -297,6 +301,7 @@ public class ReadySceneMgr : MonoBehaviour
 
     void ItemBtnFunc(int itemNum)
     {
+        if (bgmFadeOutTimer > 0.0f) return;
         SoundManager.instance.PlayerSound("Button");
         isItemChecked[itemNum] = !isItemChecked[itemNum];
         checkImg[itemNum].gameObject.SetActive(isItemChecked[itemNum]);

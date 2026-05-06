@@ -14,7 +14,7 @@ public class TitleMgr : MonoBehaviour
     GameObject loginPanelObj;
 
     bool isTest = false;
-
+    bool isPrePlay = false;
     void Awake() => AwakeFunc();
 
     void AwakeFunc()
@@ -40,7 +40,7 @@ public class TitleMgr : MonoBehaviour
         });
 
         MusicManager.instance.PlayMusic("MainBGM");
-        StartCoroutine(SoundManager.instance.PlaySoundInAdvance());
+        PrePlaySoundFunc();
     }
 
     //void Update() => UpdateFunc();
@@ -60,5 +60,13 @@ public class TitleMgr : MonoBehaviour
         }
 
 
+    }
+
+    void PrePlaySoundFunc()
+    {
+        if (isPrePlay) return;
+
+        isPrePlay = true;
+        StartCoroutine(SoundManager.instance.PlaySoundInAdvance());
     }
 }

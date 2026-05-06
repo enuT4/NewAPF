@@ -128,6 +128,7 @@ public class SDJRIngameMgr : MonoBehaviour
     GameObject hammerItemObj;
     Vector3 tempHammerPos;
     Transform hammerTileSpawnPos;
+    int hammerComboCount = 0;
 
     //업그레이드 변수
     int bonusScore = 0;
@@ -763,13 +764,8 @@ public class SDJRIngameMgr : MonoBehaviour
             {
                 isHammerOn = false;
                 hammerItemObj.gameObject.SetActive(false);
-                if (superFeverTimer <= 0.0f)
-                {
-                    if (comboCount < 13)
-                        fireCombo = 13;
-                    else
-                        fireCombo = comboCount + 20;
-                }
+                if (isSuperFeverOn) fireCombo = comboCount + Mathf.Max(5, 40 - hammerComboCount);
+                hammerComboCount = 0;
                 isSpawn[2] = false;
                 hammerDurationTime = 2.5f;
                 //hammer duration time 이후에도 다시 돌아오지 않음
@@ -797,8 +793,9 @@ public class SDJRIngameMgr : MonoBehaviour
                 superFeverTimer = 0.0f;
                 gameLevel = tempLevel;
                 isSuperFeverOn = false;
-                if (!isHammerOn)
-                    fireCombo = comboCount + 41;
+
+                fireCombo = comboCount + 20;
+                if (isHammerOn) fireCombo += 20;
             }
         }
     }
@@ -1037,6 +1034,7 @@ public class SDJRIngameMgr : MonoBehaviour
                 hammerItemObj.transform.position = tileListArray[movedTileNumber[0]][movedTileNumber[1]].transform.position;
                 hammerItemObj.SetActive(true);
                 hammerDurationTime = 2.5f;
+                fireCombo = Mathf.Max(fireCombo, comboCount + 40);
                 judgeComboCount = gameLevel + 2;
                 break;
             case (TileType.Special3):                       //한줄뿅
@@ -1242,8 +1240,8 @@ public class SDJRIngameMgr : MonoBehaviour
         currentScore += (int)bonusValue;
         scoreText.text = currentScore.ToString("N0");
 
-        if (isHammerOn) guageAmount = 2.0f;
-        else guageAmount = 3.2f;
+        if (isHammerOn) guageAmount = 0.5f;
+        else guageAmount = 3.0f;
 
         currentGuage += guageAmount;
         if (maxGuage <= currentGuage)
@@ -1269,7 +1267,7 @@ public class SDJRIngameMgr : MonoBehaviour
 
         tempComboObj = MemoryPoolManager.instance.GetObject("ComboSpawnGroup");
         tempComboObj.transform.position = comboTextObj.transform.position;
-        tempComboObj.transform.localScale = initComboScale;
+        tempComboObj.transform.localScale = Vector3.one;
         tempComboObj.GetComponent<ComboText>().SetComboTextFunc(tempCombo);
         tempComboObj.SetActive(true);
 
@@ -1361,12 +1359,16 @@ public class SDJRIngameMgr : MonoBehaviour
         deleteTileListArray[columnIndex].Add(tileListArray[columnIndex].Count - 1);
         DestroyExceptionFunc(null, tileListArray, deleteTileListArray);
         comboCount++;
+        hammerComboCount++;
         ComboTextFunc(comboCount);
         AddScoreFunc();
         if (comboCount >= fireCombo && !isSuperFeverOn)
         {
             isSuperFeverOn = true;
             ComboUpdateFunc();
+            hammerComboCount = 0;
+            Debug.Log("해머 디스트로이" + comboCount + " : " + fireCombo);
+
         }
     }
 
@@ -1412,8 +1414,8 @@ public class SDJRIngameMgr : MonoBehaviour
         if (!isGameOver) return;
         gameoverPanelObj.SetActive(true);
         gameoverPanelObj.GetComponent<GameOverPanel>().TimeUpOrGameOver(false);
-        gameoverSoundInt = UnityEngine.Random.Range(0, 3);
-        SoundManager.instance.PlayerSound("GameOver" + gameoverSoundInt);
+        gameoverSoundInt = UnityEngine.Random.Range(1, 4);
+        SoundManager.instance.PlayerSound("GameOver" + gameoverSoundInt);       //GameOver1, GameOver2, GameOver3
         MusicManager.instance.StopMusic();
         //게임 오버 사운드
     }

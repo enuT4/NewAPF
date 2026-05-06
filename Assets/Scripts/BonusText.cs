@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class BonusText : MemoryPoolObject
 {
     float effectTime = 0.0f;
-    float moveVelocity = 20.0f;
+    float moveVelocity = 25.0f;
     float alphaVelocity = 1.0f / (1.0f - 0.5f);
 
     Vector3 currentPos = Vector3.zero;
@@ -18,7 +18,6 @@ public class BonusText : MemoryPoolObject
     Color thisColor;
     Outline thisOutline;
     Color outlineColor;
-    float screenScale;
     Vector3 initPos;
 
     public static BonusText inst;
@@ -42,13 +41,12 @@ public class BonusText : MemoryPoolObject
         sortLayerCanvas.overrideSorting = true;
         sortLayerCanvas.sortingOrder = 6;
 
-        if (GlobalValue.g_GameKind == GameKind.SDJR)
-            moveVelocity /= 10.0f;
+        //if (GlobalValue.g_GameKind == GameKind.SDJR)
+        //    moveVelocity /= 10.0f;
 
 
-        screenScale = Screen.width / 1440.0f;
         //thisText.gameObject.transform.localPosition = new Vector3(0.0f, 200.0f * screenScale, 0.0f);
-        thisText.fontSize = (int)(thisText.fontSize * screenScale);
+        //thisText.fontSize = (int)(thisText.fontSize * screenScale);
         
         textRectTransform = thisText.GetComponent<RectTransform>();
 

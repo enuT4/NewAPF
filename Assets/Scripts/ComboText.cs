@@ -30,7 +30,7 @@ public class ComboText : MemoryPoolObject
         comboText.fontSize = 80;
         sortLayerCanvas.overrideSorting = true;
         textGrowSpeed = 500.0f * screenScaleRate;
-        comboFontSizeArray = new float[3] { 160 * screenScaleRate, 140 * screenScaleRate, 140 * screenScaleRate };
+        comboFontSizeArray = new float[3] { 160, 140, 140 };
 
     }
 
@@ -40,7 +40,7 @@ public class ComboText : MemoryPoolObject
         effectTime += Time.deltaTime;
         if (effectTime < 0.2f)
         {
-            tempFontSize += Time.deltaTime * textGrowSpeed * screenScaleRate;
+            tempFontSize += Time.deltaTime * textGrowSpeed;
             if (comboFontSizeArray[0] <= tempFontSize)
                 tempFontSize = comboFontSizeArray[0];
             if (sortLayerCanvas.sortingOrder != 7)
@@ -48,7 +48,7 @@ public class ComboText : MemoryPoolObject
         }
         else if (effectTime < 0.4f)
         {
-            tempFontSize -= Time.deltaTime * textGrowSpeed * screenScaleRate;
+            tempFontSize -= Time.deltaTime * textGrowSpeed;
             if (tempFontSize <= comboFontSizeArray[1])
                 tempFontSize = comboFontSizeArray[1];
             if (sortLayerCanvas.sortingOrder != 6)

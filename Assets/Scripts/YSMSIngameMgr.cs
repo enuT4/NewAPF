@@ -744,6 +744,7 @@ public class YSMSIngameMgr : MonoBehaviour
 
         comboClone = MemoryPoolManager.instance.GetObject("ComboSpawnGroup");
         comboClone.transform.position = comboTextObj.transform.position;
+        comboClone.transform.localScale = Vector3.one;
         comboClone.GetComponent<ComboText>().SetComboTextFunc(tempCombo);
         comboClone.SetActive(true);
 
@@ -769,6 +770,7 @@ public class YSMSIngameMgr : MonoBehaviour
         bonusClone = MemoryPoolManager.instance.GetObject("BonusTextSpawnGroup");
         bonusClone.transform.position = bonusTextObj.transform.position;
         bonusClone.GetComponent<BonusText>().SetScore(GameKind.YSMS);
+        bonusClone.transform.localScale = Vector3.one;
         //bonusClone.GetComponent<BonusText>().SetScore(GlobalValue.g_GameKind);
         bonusClone.SetActive(true);
 
