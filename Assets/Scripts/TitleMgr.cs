@@ -10,8 +10,12 @@ public class TitleMgr : MonoBehaviour
 {
     internal Image bgImg;
 
+    GameObject canvasObj;
     [SerializeField] private Button gameStartBtn;
     GameObject loginPanelObj;
+    [SerializeField] private Button settingBtn;
+    [HideInInspector] public GameObject settingPanelObj;
+    GameObject settingChildObj;
 
     bool isTest = false;
     bool isPrePlay = false;
@@ -19,14 +23,20 @@ public class TitleMgr : MonoBehaviour
 
     void AwakeFunc()
     {
+        if (!canvasObj) canvasObj = GameObject.Find("Canvas").gameObject;
         if (!SoundManager.instance) SoundManager.instance.CallInstance();
         if (!MusicManager.instance) MusicManager.instance.CallInstance();
 
-        if (!bgImg) bgImg = GameObject.Find("Canvas").transform.Find("TitleImg").GetComponent<Image>();
+        if (!bgImg) bgImg = canvasObj.transform.Find("TitleImg").GetComponent<Image>();
         if (!gameStartBtn) gameStartBtn = bgImg.transform.Find("GameStartBtn").GetComponent<Button>();
 
-        if (!loginPanelObj) loginPanelObj = GameObject.Find("Canvas").transform.Find("LoginPanelObj").gameObject;
+        if (!loginPanelObj) loginPanelObj = canvasObj.transform.Find("LoginPanelObj").gameObject;
         if (loginPanelObj.activeSelf) loginPanelObj.SetActive(false);
+
+        if (!settingBtn) settingBtn = bgImg.transform.Find("SettingBtn").GetComponent<Button>();
+        if (!settingPanelObj) settingPanelObj = canvasObj.transform.Find("SettingPanel").gameObject;
+        if (!settingChildObj) settingChildObj = settingPanelObj.transform.GetChild(0).gameObject;
+
     }
 
 
@@ -37,6 +47,13 @@ public class TitleMgr : MonoBehaviour
         {
             SoundManager.instance.PlayerSound("Button");
             loginPanelObj.SetActive(true);
+        });
+
+        if (settingBtn != null) settingBtn.onClick.AddListener(() =>
+        {
+            SoundManager.instance.PlayerSound("Button");
+            settingPanelObj.SetActive(true);
+            if (settingChildObj != null && !settingChildObj.activeSelf) settingChildObj.SetActive(true);
         });
 
         MusicManager.instance.PlayMusic("MainBGM");
@@ -68,5 +85,10 @@ public class TitleMgr : MonoBehaviour
 
         isPrePlay = true;
         StartCoroutine(SoundManager.instance.PlaySoundInAdvance());
+    }
+
+    public void TurnOffSettingPanelFunc()
+    {
+        if (settingPanelObj.activeSelf) settingPanelObj.SetActive(false);
     }
 }

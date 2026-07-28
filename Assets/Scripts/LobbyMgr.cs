@@ -19,6 +19,9 @@ public class LobbyMgr : MonoBehaviour
     [SerializeField] internal Button SDJRGameBtn;
     [SerializeField] internal Text SDJRBestScoreTxt;
 
+    [SerializeField] internal Button settingBtn;
+    [SerializeField] internal GameObject settingPanelObj;
+
     [SerializeField] GameObject msgBoxObj;
     MessageBox msgBox;
 
@@ -30,7 +33,10 @@ public class LobbyMgr : MonoBehaviour
         if (!bgImg) bgImg = lobbyCanvas.transform.Find("BGImg").GetComponent<Image>();
         if (!backBtn) backBtn = bgImg.transform.Find("BackBtn").GetComponent<Button>();
         if (!msgBoxObj) msgBoxObj = lobbyCanvas.transform.Find("MessageBox").gameObject;
+        if (!settingBtn) settingBtn = bgImg.transform.Find("SettingBtn").GetComponent<Button>();
+        if (!settingPanelObj) settingPanelObj = bgImg.transform.Find("SettingPanel").gameObject;
         
+
         msgBox = msgBoxObj.GetComponent<MessageBox>();
     }
 
@@ -40,6 +46,9 @@ public class LobbyMgr : MonoBehaviour
     {
         if (!MusicManager.instance.IsMusicPlaying())
             MusicManager.instance.PlayMusic("MainBGM");
+
+        if (settingPanelObj != null && settingPanelObj.activeSelf)
+            settingPanelObj.SetActive(false);
 
         CheckGM();
         totalScoreTxt.text = GlobalValue.g_TotalScore.ToString("N0");
@@ -60,6 +69,9 @@ public class LobbyMgr : MonoBehaviour
 
         if (SDJRGameBtn != null)
             SDJRGameBtn.onClick.AddListener(() => { SetGameKind(GameKind.SDJR); });
+
+        if(settingBtn != null)
+            settingBtn.onClick.AddListener(() => { settingPanelObj.SetActive(true); });
     }
 
     //void Update() => UpdateFunc();

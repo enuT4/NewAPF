@@ -31,7 +31,7 @@ public class PausePanel : MonoBehaviour
         if (!gamehelpPanelObj) gamehelpPanelObj = transform.Find("GameHelpPanelImg").gameObject;
         if (!gamehelpPanelCloseBtn) gamehelpPanelCloseBtn = gamehelpPanelObj.transform.GetChild(1).GetComponent<Button>();
         if (!settingBtn) settingBtn = transform.Find("SettingBtn").GetComponent<Button>();
-        if (!settingPanelObj) settingPanelObj = transform.Find("SettingPanelObj").gameObject;
+        if (!settingPanelObj) settingPanelObj = transform.Find("SettingPanel").gameObject;
         if (msgBoxObj != null) msgBox = msgBoxObj.GetComponent<MessageBox>();
         if (gamehelpPanelObj != null) gameCount = gamehelpPanelObj.transform.Find("GameHelp").transform.childCount;
         gamehelpImgArr = new GameObject[gameCount];

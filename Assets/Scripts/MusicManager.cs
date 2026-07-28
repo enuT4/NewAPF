@@ -120,7 +120,7 @@ namespace Enut4LJR
             if (GlobalValue.masterMute || GlobalValue.musicMute)
                 audioSource.volume = 0f;
             else
-                audioSource.volume = 1f;
+                audioSource.volume = .3f * GlobalValue.masterVolume * GlobalValue.musicVolume;
         }
     }
 }

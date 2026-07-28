@@ -370,5 +370,13 @@ namespace Enut4LJR
             return idx;
         }
 
+        public void ApplyMute()
+        {
+            if (GlobalValue.masterMute || GlobalValue.soundMute)
+                audioSource.volume = 0f;
+            else
+                audioSource.volume = .3f * GlobalValue.masterVolume * GlobalValue.effectVolume;
+        }
+
     }
 }
